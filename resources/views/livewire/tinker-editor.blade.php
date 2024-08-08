@@ -1,6 +1,7 @@
 <div
     class="flex-grow flex flex-col max-h-full overflow-hidden"
     :class="$store.editor.minimalMode ? 'h-screen' : 'h-[100vh-40px]'"
+    wire:poll.5s
 >
     <div
         x-data="codemirroreditor"
