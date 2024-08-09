@@ -5,7 +5,7 @@ import.meta.glob([
     '../fonts/**',
 ]);
 // alpine
-import Alpine from 'alpinejs';
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import focus from '@alpinejs/focus';
 // codemirror
 import {basicSetup, EditorView} from 'codemirror';
@@ -285,4 +285,4 @@ window.gruvboxDark = gruvboxDark;
 // -----------------------------------------------
 window.Alpine = Alpine;
 Alpine.plugin(focus);
-Alpine.start();
+Livewire.start();

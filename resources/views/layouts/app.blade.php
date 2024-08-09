@@ -45,7 +45,7 @@
 
         @stack('modals')
 
-        @livewireScripts
+        @livewireScriptConfig
 
         <script>
             document.addEventListener('alpine:init', () => {
