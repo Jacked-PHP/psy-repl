@@ -9,8 +9,8 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        return view('tinker.editor', [
-            'shellId' => auth()->user()->shells()->first()?->id ?? null,
+        return view('dashboard', [
+            'shells' => auth()->user()->shells ?? collect(),
         ]);
     }
 }

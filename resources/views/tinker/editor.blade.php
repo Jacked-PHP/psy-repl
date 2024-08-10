@@ -1,5 +1,5 @@
 <x-app-layout>
     @livewire('tinker-editor', [
-        'shellId' => $shellId,
+        'shell' => $shell,
     ])
 </x-app-layout>

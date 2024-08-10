@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ShellController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -16,7 +18,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('home');
+    $user = User::first();
+    if (null === $user) {
+        return view('home');
+    }
+    Auth::login($user);
+    return redirect()->route('dashboard');
 })->name('home');
 
 Route::get('login', function() {
@@ -44,6 +51,8 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
 ])->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+    Route::get('/shell/{shell?}', [ShellController::class, 'index'])
+        ->name('shells.show');
 });

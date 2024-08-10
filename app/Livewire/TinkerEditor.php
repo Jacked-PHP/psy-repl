@@ -26,25 +26,12 @@ class TinkerEditor extends Component
 
     protected $phpOpenTag = '<?php' . PHP_EOL;
 
-    public function mount(?int $shellId = null)
+    public function mount(Shell $shell)
     {
-        $shell = null;
-
         /** @var User $user */
         $user = auth()->user();
         if (null === $user) {
             throw new Exception('User not logged in');
-        }
-
-        if (null !== $shellId) {
-            $shell = Shell::find($shellId);
-        }
-
-        if (null === $shell) {
-            $shell = Shell::create([
-                'user_id' => $user->id,
-                'title' => Uuid::uuid4()->toString(),
-            ]);
         }
 
         $this->shellId = $shell->id;

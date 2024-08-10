@@ -13,9 +13,9 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-4 sm:flex">
-                    {{--<x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Shells')">
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Shells')">
                         {{ __('Shells') }}
-                    </x-nav-link>--}}
+                    </x-nav-link>
                 </div>
             </div>
 
