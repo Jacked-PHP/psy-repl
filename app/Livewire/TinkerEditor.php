@@ -139,20 +139,6 @@ class TinkerEditor extends Component
         return $result;
     }
 
-    protected function getDockerContainerNameFromDockerCompose(): string
-    {
-        $container = 'php';
-        $projectPath = '/home/savior/Code/TCPigeon/panel2';
-        $result = Process::path($projectPath)->run("docker-compose ps -q " . $container . " | xargs docker inspect --format '{{ .Name }}' | sed 's/^\///'");
-
-        $error = $result->errorOutput();
-        if (!empty($error)) {
-            throw new Exception('Failed to retrieve docker container name!');
-        }
-
-        return $result->output();
-    }
-
     protected function loadCustomEnv(string $filePath): array
     {
         $envArray = [];
