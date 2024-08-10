@@ -2,11 +2,13 @@
     {{-- Closed : BEGIN --}}
     <div x-ref="control-view-section" x-show="!formOpened" class="text-xs text-gray-700 px-2 flex justify-between cursor-pointer" @click="formOpened = !formOpened">
         <div class="flex justify-between items-center gap-4">
-            {{--<div x-text="title"></div>--}}
+            <div x-text="title"></div>
             <div class="flex gap-2"><span class="font-bold">Path:</span><span x-text="path ?? '(not selected)'"></span></div>
             <template x-if="isDockerContext">
                 <div class="flex gap-2"><span class="font-bold">Container:</span><span x-text="dockerContainer ?? '(not set)'"></span></div>
             </template>
+            <svg wire:loading.remove x-show="!loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 text-green-700"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+            <svg wire:loading x-show="loading" class="w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/><rect x="11" y="6" rx="1" width="2" height="7"><animateTransform attributeName="transform" type="rotate" dur="9s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect><rect x="11" y="11" rx="1" width="2" height="9"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect></svg>
         </div>
     </div>
     {{-- Closed : END --}}
@@ -18,8 +20,8 @@
 
             <div class="text-xs flex items-center gap-2">
                 <span>Settings</span>
-                <svg x-show="!loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 text-green-700"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                <svg x-show="loading" class="w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/><rect x="11" y="6" rx="1" width="2" height="7"><animateTransform attributeName="transform" type="rotate" dur="9s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect><rect x="11" y="11" rx="1" width="2" height="9"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect></svg>
+                <svg wire:loading.remove x-show="!loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 text-green-700"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                <svg wire:loading x-show="loading" class="w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/><rect x="11" y="6" rx="1" width="2" height="7"><animateTransform attributeName="transform" type="rotate" dur="9s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect><rect x="11" y="11" rx="1" width="2" height="9"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect></svg>
             </div>
 
             <div class="w-14 text-right">
@@ -35,15 +37,10 @@
             <span class="w-32">Title:</span>
             <div class="relative text-gray-600 flex-grow">
                 <input
-                    x-model.debounce.500ms="title"
-                    x-ref="title"
+                    wire:model.live="title"
                     type="text"
                     name="title"
                     class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                    @input="
-                        loading = true;
-                        setTimeout(() => loading = false, 500)
-                    "
                 >
             </div>
         </label>
@@ -52,16 +49,12 @@
             <span class="w-32">PHP Binary:</span>
             <div class="relative text-gray-600 flex-grow">
                 <input
-                    x-model.debounce.500ms="php_binary"
+                    wire:model.live="php_binary"
                     x-ref="php_binary"
                     type="text"
                     name="php_binary"
                     placeholder="/usr/bin/php"
                     class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                    @input="
-                        loading = true;
-                        setTimeout(() => loading = false, 500)
-                    "
                 >
             </div>
         </label>
@@ -70,15 +63,11 @@
             <span class="w-32">Shell Title:</span>
             <div class="relative text-gray-600 flex-grow">
                 <input
-                    x-model.debounce.500ms="title"
+                    wire:model.live="title"
                     type="text"
                     name="title"
                     placeholder="My Title"
                     class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                    @input="
-                        loading = true;
-                        setTimeout(() => loading = false, 500)
-                    "
                 >
             </div>
         </label>
@@ -88,15 +77,12 @@
             <span class="w-32">Project's Folder:</span>
             <div class="relative text-gray-600 flex-grow">
                 <input
-                    x-model.debounce.500ms="path"
+                    wire:model.live="path"
+                    x-ref="path"
                     type="search"
                     name="serch"
                     placeholder="/my/path"
                     class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                    @input="
-                        loading = true;
-                        setTimeout(() => loading = false, 500)
-                    "
                 >
                 <button wire:click="openFolderDialog" type="submit" class="absolute right-0 top-0 mt-1.5 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -126,46 +112,39 @@
             <div class="flex gap-2 items-center">
                 <span class="w-32">Docker Context:</span>
                 <input
-                    x-model="isDockerContext"
+                    wire:model.live="isDockerContext"
                     type="checkbox"
-                    @keyup="
-                        loading = true;
-                        setTimeout(() => loading = false, 500)
-                    "
                 />
             </div>
-            <template x-if="isDockerContext">
+        </label>
+        <template x-if="$wire.isDockerContext">
+            <label class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Container name:</span>
+                </div>
                 <div class="relative text-gray-600 flex-grow">
                     <input
-                        x-model.debounce.500ms="dockerContainer"
+                        wire:model.live="dockerContainer"
                         type="text"
                         name="dockerContainer"
                         placeholder="php"
                         class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                        @input="
-                            loading = true;
-                            setTimeout(() => loading = false, 500)
-                        "
                     >
                 </div>
-            </template>
-        </label>
-        <template x-if="isDockerContext">
+            </label>
+        </template>
+        <template x-if="$wire.isDockerContext">
             <label class="flex items-center gap-2 text-sm h-10">
                 <div class="flex gap-2 items-center">
                     <span class="w-32">Docker Workdir:</span>
                 </div>
                 <div class="relative text-gray-600 flex-grow">
                     <input
-                        x-model.debounce.500ms="dockerWorkdir"
+                        wire:model.live="dockerWorkdir"
                         type="text"
                         name="dockerWorkdir"
                         placeholder="/var/www"
                         class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                        @input="
-                            loading = true;
-                            setTimeout(() => loading = false, 500)
-                        "
                     >
                 </div>
             </label>

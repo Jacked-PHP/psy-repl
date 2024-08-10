@@ -21,20 +21,23 @@
                 // codemirror instances
                 editorType: 'monaco', // 'codemirror' or 'monaco'
                 // shell state
-                code: @entangle('code'),
-                output: @entangle('output'),
-                path: @entangle('path'),
-                title: @entangle('title'),
-                php_binary: @entangle('php_binary'),
+                code: '',
+                output: '',
+                path: '{{ $path }}',
+                title: '{{ $title }}',
+                php_binary: '{{ $php_binary }}',
                 isExecuting: false,
-                isDockerContext: @entangle('isDockerContext'),
-                dockerContainer: @entangle('dockerContainer'),
-                dockerWorkdir: @entangle('dockerWorkdir'),
+                isDockerContext: '{{ $isDockerContext }}',
+                dockerContainer: '{{ $dockerContainer }}',
+                dockerWorkdir: '{{ $dockerWorkdir }}',
                 // view structure
                 formOpened: false, // TODO: persist
                 displayHorizontal: true, // TODO: persist
 
                 init() {
+                    this.code = this.$wire.code;
+                    this.output = this.$wire.output;
+
                     if (this.editorType === 'codemirror') {
                         window.editor = this.startEditor(this.$refs.editor, this.code, false);
                     } else { // monaco
@@ -124,8 +127,7 @@
                         readOnly: readonly,
                     });
                     if (!readonly) { // input editor
-                        monacoEditor.getModel()
-                            .onDidChangeContent(() => this.code = monacoEditor.getValue());
+                        monacoEditor.getModel().onDidChangeContent(this.saveCode.bind(this, monacoEditor));
 
                         monacoEditor.addCommand(window.monaco.KeyMod.CtrlCmd | window.monaco.KeyMod.Shift | window.monaco.KeyCode.Enter, this.executeCode.bind(this));
                     }
@@ -135,6 +137,11 @@
                 // --------------------------------------------
                 // Monaco : END
                 // --------------------------------------------
+
+                saveCode(monacoEditor) {
+                    this.code = monacoEditor.getValue();
+                    this.$wire.saveCode(this.code);
+                },
 
                 executeCode(view) {
                     if (this.isExecuting) return;

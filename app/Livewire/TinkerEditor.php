@@ -201,6 +201,13 @@ class TinkerEditor extends Component
         $shell->save();
     }
 
+    public function saveCode(string $code)
+    {
+        $shell = Shell::find($this->shellId);
+        $shell->code = $code;
+        $shell->save();
+    }
+
     public function updated($name, $value)
     {
         $shell = Shell::find($this->shellId);
