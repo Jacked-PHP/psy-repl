@@ -17,6 +17,7 @@
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('codemirroreditor', () => ({
+                loading: false,
                 // codemirror instances
                 editorType: 'monaco', // 'codemirror' or 'monaco'
                 // shell state

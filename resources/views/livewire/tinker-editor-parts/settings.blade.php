@@ -16,7 +16,11 @@
         <div @click="formOpened = !formOpened" x-ref="control-view-section" class="flex justify-between cursor-pointer">
             <span class="w-14"></span>
 
-            <span class="text-xs">Settings</span>
+            <div class="text-xs flex items-center gap-2">
+                <span>Settings</span>
+                <svg x-show="!loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 text-green-700"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                <svg x-show="loading" class="w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/><rect x="11" y="6" rx="1" width="2" height="7"><animateTransform attributeName="transform" type="rotate" dur="9s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect><rect x="11" y="11" rx="1" width="2" height="9"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect></svg>
+            </div>
 
             <div class="w-14 text-right">
                 <button @click="formOpened = !formOpened" class="p-1 border rounded-md border-transparent hover:border-gray-400">
@@ -28,16 +32,54 @@
         </div>
 
         <label class="flex items-center gap-2 text-sm">
+            <span class="w-32">Title:</span>
+            <div class="relative text-gray-600 flex-grow">
+                <input
+                    x-model.debounce.500ms="title"
+                    x-ref="title"
+                    type="text"
+                    name="title"
+                    class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    @input="
+                        loading = true;
+                        setTimeout(() => loading = false, 500)
+                    "
+                >
+            </div>
+        </label>
+
+        <label class="flex items-center gap-2 text-sm">
             <span class="w-32">PHP Binary:</span>
             <div class="relative text-gray-600 flex-grow">
-                <input x-model.debounce.500ms="php_binary" x-ref="php_binary" type="text" name="php_binary" placeholder="/usr/bin/php" class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black">
+                <input
+                    x-model.debounce.500ms="php_binary"
+                    x-ref="php_binary"
+                    type="text"
+                    name="php_binary"
+                    placeholder="/usr/bin/php"
+                    class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    @input="
+                        loading = true;
+                        setTimeout(() => loading = false, 500)
+                    "
+                >
             </div>
         </label>
 
         <label class="flex items-center gap-2 text-sm hidden">
             <span class="w-32">Shell Title:</span>
             <div class="relative text-gray-600 flex-grow">
-                <input x-model.debounce.500ms="title" type="text" name="title" placeholder="My Title" class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black">
+                <input
+                    x-model.debounce.500ms="title"
+                    type="text"
+                    name="title"
+                    placeholder="My Title"
+                    class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    @input="
+                        loading = true;
+                        setTimeout(() => loading = false, 500)
+                    "
+                >
             </div>
         </label>
 
@@ -45,7 +87,17 @@
         <label class="flex items-center gap-2 w-full text-sm">
             <span class="w-32">Project's Folder:</span>
             <div class="relative text-gray-600 flex-grow">
-                <input x-model.debounce.500ms="path" type="search" name="serch" placeholder="/my/path" class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black">
+                <input
+                    x-model.debounce.500ms="path"
+                    type="search"
+                    name="serch"
+                    placeholder="/my/path"
+                    class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    @input="
+                        loading = true;
+                        setTimeout(() => loading = false, 500)
+                    "
+                >
                 <button wire:click="openFolderDialog" type="submit" class="absolute right-0 top-0 mt-1.5 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -73,11 +125,28 @@
         <label class="flex items-center gap-2 text-sm h-10">
             <div class="flex gap-2 items-center">
                 <span class="w-32">Docker Context:</span>
-                <input x-model="isDockerContext" type="checkbox" />
+                <input
+                    x-model="isDockerContext"
+                    type="checkbox"
+                    @keyup="
+                        loading = true;
+                        setTimeout(() => loading = false, 500)
+                    "
+                />
             </div>
             <template x-if="isDockerContext">
                 <div class="relative text-gray-600 flex-grow">
-                    <input x-model.debounce.500ms="dockerContainer" type="text" name="dockerContainer" placeholder="php" class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black">
+                    <input
+                        x-model.debounce.500ms="dockerContainer"
+                        type="text"
+                        name="dockerContainer"
+                        placeholder="php"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                        @input="
+                            loading = true;
+                            setTimeout(() => loading = false, 500)
+                        "
+                    >
                 </div>
             </template>
         </label>
@@ -87,7 +156,17 @@
                     <span class="w-32">Docker Workdir:</span>
                 </div>
                 <div class="relative text-gray-600 flex-grow">
-                    <input x-model.debounce.500ms="dockerWorkdir" type="text" name="dockerWorkdir" placeholder="/var/www" class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black">
+                    <input
+                        x-model.debounce.500ms="dockerWorkdir"
+                        type="text"
+                        name="dockerWorkdir"
+                        placeholder="/var/www"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                        @input="
+                            loading = true;
+                            setTimeout(() => loading = false, 500)
+                        "
+                    >
                 </div>
             </label>
         </template>
