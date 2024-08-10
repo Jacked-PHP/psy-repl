@@ -31,8 +31,9 @@
                 dockerContainer: '{{ $dockerContainer }}',
                 dockerWorkdir: '{{ $dockerWorkdir }}',
                 // view structure
-                formOpened: false, // TODO: persist
+                settingsOpen: {{ $settingsOpen ? 'true' : 'false' }},
                 displayHorizontal: true, // TODO: persist
+                wordWrap: {{ $wordWrap ? 'true' : 'false' }},
 
                 init() {
                     this.code = this.$wire.code;
@@ -49,11 +50,6 @@
                     } else { // monaco
                         window.outputEditor = this.startMonacoEditor(this.$refs.output, this.output, true);
                     }
-
-                    this.$watch('formOpened', () => {
-                        window.editor.layout();
-                        window.outputEditor.layout();
-                    })
 
                     this.macosFix();
                 },
@@ -114,7 +110,7 @@
                         language: 'php',
                         automaticLayout: true,
                         minimap: {
-                            enabled: false
+                            enabled: true,
                         },
                         theme: 'vs-dark',
                         padding: {
@@ -122,9 +118,10 @@
                         },
                         lineHeight: 23,
                         fontSize: 18,
-                        wordWrap: 'on',
+                        wordWrap: this.wordWrap,
                         autoClosingBrackets: 'always',
                         readOnly: readonly,
+                        scrollBeyondLastLine: false,
                     });
                     if (!readonly) { // input editor
                         monacoEditor.getModel().onDidChangeContent(this.saveCode.bind(this, monacoEditor));
@@ -143,6 +140,14 @@
                     this.$wire.saveCode(this.code);
                 },
 
+                toggleSettingsForm() {
+                    console.log(this.settingsOpen)
+                    this.$wire.set('settingsOpen', !this.settingsOpen);
+                    this.settingsOpen = !this.settingsOpen;
+                    window.editor.layout();
+                    window.outputEditor.layout();
+                },
+
                 executeCode(view) {
                     if (this.isExecuting) return;
 
@@ -157,9 +162,6 @@
 
                 async execute(content) {
                     let result = await this.$wire.executeCode(content);
-                    // for html
-                    // this.$refs.output.innerHTML = this.makeOutputPretty(result);
-                    // for editors
 
                     if (this.editorType === 'codemirror') {
                         window.outputEditor.dispatch({
@@ -174,36 +176,6 @@
                     }
 
                     this.isExecuting = false;
-                },
-
-                makeOutputPretty(output) {
-                    const lines = output.trim().split('\n');
-
-                    let html = '<div class="p-4">';
-                    html += '<code class="text-white font-mono whitespace-pre">';
-
-                    lines.forEach(line => {
-                        let formattedLine = line;
-
-                        if (line.startsWith('[!]')) {
-                            formattedLine = `<span class="text-red-600">${line}</span>`;
-                        } else if (line.startsWith('#')) {
-                            formattedLine = `<span class="text-green-400">${line}</span>`;
-                        } else if (line.includes('=>')) {
-                            formattedLine = `<span class="text-blue-400">${line}</span>`;
-                        } else if (line.includes('{')) {
-                            formattedLine = `<span class="text-yellow-400">${line}</span>`;
-                        } else if (line.includes('}')) {
-                            formattedLine = `<span class="text-yellow-400">${line}</span>`;
-                        }
-
-                        html += `<div class="ml-4">${formattedLine}</div>`;
-                    });
-
-                    html += '</code>';
-                    html += '</div>';
-
-                    return html;
                 },
             }));
         });

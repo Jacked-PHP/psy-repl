@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "709bfcf7ed8423773c3d7cd5e453b0c6",
+    "content-hash": "54a2f1330f9507e32d49fdec84a43950",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4353,23 +4353,23 @@
         },
         {
             "name": "plank/laravel-metable",
-            "version": "5.4.0",
+            "version": "6.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/plank/laravel-metable.git",
-                "reference": "cd7f530fe1857fb6a406c198c5991a33ca5848a3"
+                "reference": "de76793a55b8bb19eeb181b05170b887192fbf0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/plank/laravel-metable/zipball/cd7f530fe1857fb6a406c198c5991a33ca5848a3",
-                "reference": "cd7f530fe1857fb6a406c198c5991a33ca5848a3",
+                "url": "https://api.github.com/repos/plank/laravel-metable/zipball/de76793a55b8bb19eeb181b05170b887192fbf0f",
+                "reference": "de76793a55b8bb19eeb181b05170b887192fbf0f",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "illuminate/database": "^6.20.42|^8.22.1|^9.0|^10.0",
-                "illuminate/support": "^6.20.42|^8.22.1|^9.0|^10.0",
-                "php": ">=7.3.0",
+                "illuminate/database": "^10.10|^11.0",
+                "illuminate/support": "^10.10|^11.0",
+                "php": ">=8.1",
                 "phpoption/phpoption": "^1.8"
             },
             "require-dev": {
@@ -4377,10 +4377,11 @@
                 "guzzlehttp/promises": "^1.4",
                 "laravel/legacy-factories": "^1.0.4",
                 "mockery/mockery": "^1.4.2",
-                "orchestra/testbench": "^5.20|^6.23|^7.0|^8.0",
-                "php-coveralls/php-coveralls": "^2.4.2",
-                "phpunit/phpunit": "^9.5.11",
-                "symfony/symfony": "^5.4.1|^6.1"
+                "nesbot/carbon": "^2.62.1",
+                "orchestra/testbench": "^8.0|^9.0",
+                "php-coveralls/php-coveralls": "^2.7.0",
+                "phpunit/phpunit": "^10.5",
+                "symfony/symfony": "^6.1|^7.0"
             },
             "type": "library",
             "extra": {
@@ -4408,9 +4409,9 @@
             "description": "A package for attaching arbitrary data to Eloquent models",
             "support": {
                 "issues": "https://github.com/plank/laravel-metable/issues",
-                "source": "https://github.com/plank/laravel-metable/tree/5.4.0"
+                "source": "https://github.com/plank/laravel-metable/tree/6.0.4"
             },
-            "time": "2023-02-16T18:38:57+00:00"
+            "time": "2024-05-16T02:18:34+00:00"
         },
         {
             "name": "pragmarx/google2fa",

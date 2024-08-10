@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\ShellMeta;
 use App\Models\Shell;
 use App\Models\User;
 use Exception;
@@ -14,17 +15,19 @@ use Ramsey\Uuid\Uuid;
 
 class TinkerEditor extends Component
 {
-    public $shellId = null;
-    public $title = '';
-    public $php_binary = '';
-    public $path = null;
-    public $code = 'dd(App\Models\User::get());';
-    public $output = '';
-    public $isDockerContext = false;
-    public $dockerContainer = null;
-    public $dockerWorkdir = null;
+    public ?int $shellId = null;
+    public string $title = '';
+    public string $php_binary = '';
+    public ?string $path = null;
+    public string $code = 'dd(App\Models\User::get());';
+    public string $output = '';
+    public bool $isDockerContext = false;
+    public ?string $dockerContainer = null;
+    public ?string $dockerWorkdir = null;
+    public bool $settingsOpen = false;
+    public bool $wordWrap = false;
 
-    protected $phpOpenTag = '<?php' . PHP_EOL;
+    protected string $phpOpenTag = '<?php' . PHP_EOL;
 
     public function mount(Shell $shell)
     {
@@ -35,14 +38,20 @@ class TinkerEditor extends Component
         }
 
         $this->shellId = $shell->id;
-        $this->title = $shell->title;
-        $this->php_binary = $shell->php_binary;
-        $this->code = $shell->code;
-        $this->path = $shell->path;
-        $this->isDockerContext = (bool) $shell->is_docker_context;
-        $this->dockerWorkdir = $shell->docker_workdir;
-        $this->dockerContainer = $shell->docker_container;
-        $this->output = $shell->output;
+        $this->title = $shell->title ?? '';
+        $this->php_binary = $shell->php_binary ?? '';
+        $this->code = $shell->code ?? '';
+        $this->path = $shell->path ?? '';
+        $this->output = $shell->output ?? '';
+
+        // general meta
+        $this->settingsOpen = $shell->getMeta(ShellMeta::SETTINGS_OPEN->value, false);
+        $this->wordWrap = $shell->getMeta(ShellMeta::WORD_WRAP->value, false);
+
+        // docker meta
+        $this->isDockerContext = $shell->getMeta(ShellMeta::IS_DOCKER_CONTEXT->value, false);
+        $this->dockerWorkdir = $shell->getMeta(ShellMeta::DOCKER_WORKDIR->value, '');
+        $this->dockerContainer = $shell->getMeta(ShellMeta::DOCKER_CONTAINER->value, '');
     }
 
     public function executeCode(string $content)
@@ -210,17 +219,42 @@ class TinkerEditor extends Component
 
     public function updated($name, $value)
     {
-        $shell = Shell::find($this->shellId);
-        match ($name) {
-            'title' => $shell->title = $value,
-            'path' => $shell->path = $value,
-            'php_binary' => $shell->php_binary = $value,
-            'code' => $shell->code = $value,
-            'isDockerContext' => $shell->is_docker_context = $value,
-            'dockerContainer' => $shell->docker_container = $value,
-            'dockerWorkdir' => $shell->docker_workdir = $value,
-        };
-        $shell->save();
+        // update general meta
+        if (in_array($name, [
+            'settingsOpen',
+            'wordWrap',
+        ])) {
+            $shell = Shell::find($this->shellId);
+            match ($name) {
+                'settingsOpen' => $shell->setMeta(ShellMeta::SETTINGS_OPEN->value, $value),
+                'wordWrap' => $shell->setMeta(ShellMeta::WORD_WRAP->value, $value),
+            };
+
+            if ($name === 'wordWrap') {
+                return redirect()->route('shells.show', ['shell' => $this->shellId]);
+            }
+        }
+
+        // update docker meta
+        if (in_array($name, ['isDockerContext', 'dockerContainer', 'dockerWorkdir'])) {
+            $shell = Shell::find($this->shellId);
+            match ($name) {
+                'isDockerContext' => $shell->setMeta(ShellMeta::IS_DOCKER_CONTEXT->value, $value),
+                'dockerContainer' => $shell->setMeta(ShellMeta::DOCKER_CONTAINER->value, $value),
+                'dockerWorkdir' => $shell->setMeta(ShellMeta::DOCKER_WORKDIR->value, $value),
+            };
+        }
+
+        if (in_array($name, ['title', 'path', 'php_binary', 'code'])) {
+            $shell = Shell::find($this->shellId);
+            match ($name) {
+                'title' => $shell->title = $value,
+                'path' => $shell->path = $value,
+                'php_binary' => $shell->php_binary = $value,
+                'code' => $shell->code = $value,
+            };
+            $shell->save();
+        }
     }
 
     public function render()

@@ -2,12 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\ChangeShell;
+use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Native\Laravel\Facades\ContextMenu;
 use Native\Laravel\Facades\Dock;
 use Native\Laravel\Facades\MenuBar;
 use Native\Laravel\Facades\Window;
 use Native\Laravel\Facades\GlobalShortcut;
+use Native\Laravel\Menu\Items\Label;
 use Native\Laravel\Menu\Menu;
 
 class NativeAppServiceProvider
@@ -23,7 +26,7 @@ class NativeAppServiceProvider
         Menu::new()
             // ->appMenu()
             ->submenu('About', Menu::new()
-                ->link('https://jackedphp.com', 'Jacked PHP')
+                ->link('https://github.com/Jacked-PHP/psy-repl', 'Jacked PHP - Psy REPL')
             )
             ->submenu('View', Menu::new()
                 ->toggleFullscreen()
@@ -34,14 +37,13 @@ class NativeAppServiceProvider
             'app' => config('app'),
             'native' => config('nativephp'),
         ]);
+
         MenuBar::create()
-            // ->label('Psy REPL')
+            ->label('Psy REPL')
             ->showDockIcon()
             ->icon(storage_path('app/public/logo-bar.png'))
             ->onlyShowContextMenu()
-            ->withContextMenu(
-                Menu::new()->quit()
-            );
+            ->withContextMenu(Menu::new()->quit());
 
         Window::open()
             // ->titleBarHidden()
