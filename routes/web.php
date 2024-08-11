@@ -1,11 +1,17 @@
 <?php
 
+use App\Enums\ShellMeta;
+use App\Enums\SshPasswordType;
+use App\Helpers\ShellHelper;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ShellController;
-use App\Livewire\ShellMenu;
+use App\Models\Shell;
+use Illuminate\Http\Response;
+use phpseclib3\Crypt\RSA\PrivateKey;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use phpseclib3\Net\SSH2;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,3 +63,6 @@ Route::middleware([
     Route::get('/shell/{shell?}', [ShellController::class, 'index'])
         ->name('shells.show');
 });
+
+Route::get('execute-remote/{shell}', [ShellController::class, 'executeRemoteCode'])
+    ->name('execute-remote');

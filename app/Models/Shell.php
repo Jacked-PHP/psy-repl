@@ -30,4 +30,9 @@ class Shell extends Model
     {
         return $this->getMeta(ShellMeta::IS_DOCKER_CONTEXT->value, false);
     }
+
+    public function getIsRemoteContextAttribute(): bool
+    {
+        return $this->getMeta(ShellMeta::IS_REMOTE_CONTEXT->value, false);
+    }
 }

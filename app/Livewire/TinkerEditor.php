@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\ShellMeta;
+use App\Enums\SshPasswordType;
 use App\Models\Shell;
 use App\Models\User;
 use Exception;
@@ -15,17 +16,30 @@ use Ramsey\Uuid\Uuid;
 
 class TinkerEditor extends Component
 {
+    // record data
     public ?int $shellId = null;
     public string $title = '';
     public string $php_binary = '';
     public ?string $path = null;
     public string $code = 'dd(App\Models\User::get());';
     public string $output = '';
+
+    // docker settings
     public bool $isDockerContext = false;
     public ?string $dockerContainer = null;
     public ?string $dockerWorkdir = null;
+
+    // generic settings
     public bool $settingsOpen = false;
     public bool $wordWrap = false;
+
+    // remote settings
+    public bool $isRemoteContext = false;
+    public ?string $remoteHost = null;
+    public ?string $remotePort = null;
+    public ?string $remoteUser = null;
+    public ?string $remotePassword = null;
+    public ?string $remotePasswordType = null;
 
     protected string $phpOpenTag = '<?php' . PHP_EOL;
 
@@ -52,6 +66,14 @@ class TinkerEditor extends Component
         $this->isDockerContext = $shell->getMeta(ShellMeta::IS_DOCKER_CONTEXT->value, false);
         $this->dockerWorkdir = $shell->getMeta(ShellMeta::DOCKER_WORKDIR->value, '');
         $this->dockerContainer = $shell->getMeta(ShellMeta::DOCKER_CONTAINER->value, '');
+
+        // remote meta
+        $this->isRemoteContext = $shell->getMeta(ShellMeta::IS_REMOTE_CONTEXT->value, false);
+        $this->remoteHost = $shell->getMeta(ShellMeta::REMOTE_HOST->value, '');
+        $this->remotePort = $shell->getMeta(ShellMeta::REMOTE_PORT->value, '');
+        $this->remoteUser = $shell->getMeta(ShellMeta::REMOTE_USER->value, '');
+        $this->remotePassword = $shell->getMeta(ShellMeta::REMOTE_PASSWORD->value, '');
+        $this->remotePasswordType = $shell->getMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value, SshPasswordType::PASSWORD->value);
     }
 
     public function executeCode(string $content)
@@ -77,7 +99,7 @@ class TinkerEditor extends Component
             $shell->output = $result->output();
             $shell->save();
 
-            return $result->output();
+            return $shell->output;
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();
         }
@@ -203,7 +225,7 @@ class TinkerEditor extends Component
         $shell->save();
     }
 
-    public function updated($name, $value)
+    public function updated($name, $value): void
     {
         // update general meta
         if (in_array($name, [
@@ -217,18 +239,39 @@ class TinkerEditor extends Component
             };
 
             if ($name === 'wordWrap') {
-                return redirect()->route('shells.show', ['shell' => $this->shellId]);
+                redirect()->route('shells.show', ['shell' => $this->shellId]);
             }
+
+            return;
         }
 
-        // update docker meta
-        if (in_array($name, ['isDockerContext', 'dockerContainer', 'dockerWorkdir'])) {
+        // update docker or remote meta
+        if (in_array($name, [
+            // docker settings
+            'isDockerContext',
+            'dockerContainer',
+            'dockerWorkdir',
+            // remote settings
+            'isRemoteContext',
+            'remoteHost',
+            'remotePort',
+            'remoteUser',
+            'remotePassword',
+            'remotePasswordType',
+        ])) {
             $shell = Shell::find($this->shellId);
             match ($name) {
-                'isDockerContext' => $shell->setMeta(ShellMeta::IS_DOCKER_CONTEXT->value, $value),
+                // docker settings
                 'dockerContainer' => $shell->setMeta(ShellMeta::DOCKER_CONTAINER->value, $value),
                 'dockerWorkdir' => $shell->setMeta(ShellMeta::DOCKER_WORKDIR->value, $value),
+                // remote settings
+                'remoteHost' => $shell->setMeta(ShellMeta::REMOTE_HOST->value, $value),
+                'remotePort' => $shell->setMeta(ShellMeta::REMOTE_PORT->value, $value),
+                'remoteUser' => $shell->setMeta(ShellMeta::REMOTE_USER->value, $value),
+                'remotePassword' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD->value, $value),
+                'remotePasswordType' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value, $value),
             };
+            return;
         }
 
         if (in_array($name, ['title', 'path', 'php_binary', 'code'])) {
@@ -240,6 +283,28 @@ class TinkerEditor extends Component
                 'code' => $shell->code = $value,
             };
             $shell->save();
+        }
+    }
+
+    public function toggleContext(string $meta): void
+    {
+        /** @var Shell $shell */
+        $shell = Shell::find($this->shellId);
+
+        if ($meta === ShellMeta::IS_REMOTE_CONTEXT->value) {
+            $this->isRemoteContext = !$this->isRemoteContext;
+            $this->isDockerContext = false;
+            $shell->setManyMeta([
+                ShellMeta::IS_REMOTE_CONTEXT->value => $this->isRemoteContext,
+                ShellMeta::IS_DOCKER_CONTEXT->value => false,
+            ]);
+        } elseif ($meta === ShellMeta::IS_DOCKER_CONTEXT->value) {
+            $this->isDockerContext = !$this->isDockerContext;
+            $this->isRemoteContext = false;
+            $shell->setManyMeta([
+                ShellMeta::IS_DOCKER_CONTEXT->value => $this->isDockerContext,
+                ShellMeta::IS_REMOTE_CONTEXT->value => false,
+            ]);
         }
     }
 

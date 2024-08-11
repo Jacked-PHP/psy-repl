@@ -18,6 +18,7 @@
         "mockery/mockery": "^1.4.4",
         "nativephp/electron": "dev-main",
         "nunomaduro/collision": "^7.0",
+        "phpseclib/phpseclib": "^3.0",
         "phpunit/phpunit": "^10.1",
         "plank/laravel-metable": "^6.0",
         "spatie/laravel-ignition": "^2.0"

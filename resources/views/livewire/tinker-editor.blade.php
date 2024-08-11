@@ -27,13 +27,24 @@
                 title: '{{ $title }}',
                 php_binary: '{{ $php_binary }}',
                 isExecuting: false,
+                displayHorizontal: true, // TODO: persist
+
+                // docker settings
                 isDockerContext: '{{ $isDockerContext }}',
                 dockerContainer: '{{ $dockerContainer }}',
+
+                // generic settings
                 dockerWorkdir: '{{ $dockerWorkdir }}',
-                // view structure
                 settingsOpen: {{ $settingsOpen ? 'true' : 'false' }},
-                displayHorizontal: true, // TODO: persist
                 wordWrap: {{ $wordWrap ? 'true' : 'false' }},
+
+                // remote settings
+                isRemoteContext: {{ $isRemoteContext ? 'true' : 'false' }},
+                remoteHost: '{{ $remoteHost }}',
+                remotePort: '{{ $remotePort }}',
+                remoteUser: '{{ $remoteUser }}',
+                remotePassword: '{{ $remotePassword }}',
+                remotePasswordType: '{{ $remotePasswordType }}',
 
                 init() {
                     this.code = this.$wire.code;
@@ -152,18 +163,17 @@
                     if (this.isExecuting) return;
 
                     this.isExecuting = true;
-
-                    if (this.editorType === 'codemirror') {
-                        return this.execute((view ?? window.editor).state.doc.toString());
-                    } else { // monaco
-                        return this.execute(this.code);
+                    if (!this.isRemoteContext) {
+                        this.executeCodeLocal(view);
+                    } else {
+                        this.executeCodeRemote(view);
                     }
+                    this.isExecuting = false;
                 },
 
-                async execute(content) {
-                    let result = await this.$wire.executeCode(content);
-
+                async executeCodeLocal(view) {
                     if (this.editorType === 'codemirror') {
+                        let result = this.execute((view ?? window.editor).state.doc.toString());
                         window.outputEditor.dispatch({
                             changes: {
                                 from: 0,
@@ -171,11 +181,73 @@
                                 insert: result,
                             },
                         });
-                    } else { // monaco
+                    } else if (this.editorType === 'monaco') { // monaco
+                        let result = await this.execute(this.code);
                         window.outputEditor.setValue(result);
+                    } else {
+                        let message = 'Unknown editor type';
+                        console.error(message);
+                        alert(message);
                     }
+                },
 
-                    this.isExecuting = false;
+                executeCodeRemote() {
+                    if (this.editorType === 'codemirror') {
+                        // let result = this.execute((view ?? window.editor).state.doc.toString());
+                        // window.outputEditor.dispatch({
+                        //     changes: {
+                        //         from: 0,
+                        //         to: window.outputEditor.state.doc.length,
+                        //         insert: result,
+                        //     },
+                        // });
+                        const message = 'Remote execution is not supported for CodeMirror';
+                        console.error(message);
+                        alert(message);
+                    } else if (this.editorType === 'monaco') {
+                        let result = '';
+                        fetch('/execute-remote/{{ $shellId }}').then(response => {
+                            const reader = response.body.getReader();
+                            const decoder = new TextDecoder("utf-8");
+                            function processStream({ done, value }) {
+                                if (done) {
+                                    console.log("Stream complete");
+                                    return;
+                                }
+                                const chunk = decoder.decode(value, { stream: true });
+                                const events = chunk.split("\n\n");
+                                events.forEach(event => {
+                                    if (event.trim().length > 0) {
+                                        const lines = event.trim().split("\n");
+                                        lines.forEach(line => {
+                                            if (line.startsWith("data:")) {
+                                                result += line.replace("data: ", "") + "\n";
+                                                window.outputEditor.setValue(result);
+                                            }
+                                        });
+                                    }
+                                });
+                                return reader.read().then(processStream);
+                            }
+
+                            // Start reading the stream
+                            return reader.read().then(processStream);
+                        }).catch(error => {
+                            console.error("Fetch error:", error);
+                        });
+                    } else {
+                        const message = 'Unknown editor type';
+                        console.error(message);
+                        alert(message);
+                    }
+                },
+
+                /**
+                 * @param content
+                 * @returns {Promise}
+                 */
+                execute(content) {
+                    return this.$wire.executeCode(content);
                 },
             }));
         });

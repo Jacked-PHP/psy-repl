@@ -1,3 +1,6 @@
+@use('App\Enums\ShellMeta')
+@use('App\Enums\SshPasswordType')
+
 <div x-ref="control" class="py-1 px-2 bg-white h-auto border-t border-t-gray-200 border-l border-l-gray-200 border-r border-r-gray-200 rounded rounded-tl-2xl rounded-tr-2xl mx-4 drop-shadow-md" :class="$store.editor.minimalMode ? 'hidden' : ''" x-cloak>
     {{-- Closed : BEGIN --}}
     <div x-ref="control-view-section" x-show="!settingsOpen" class="text-xs text-gray-700 px-2 flex justify-between cursor-pointer" @click="toggleSettingsForm">
@@ -45,11 +48,20 @@
 
             <button
                 type="button"
-                wire:click="$toggle('isDockerContext')"
+                wire:click="toggleContext('{{ ShellMeta::IS_DOCKER_CONTEXT->value }}')"
                 class="rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm ring-1 ring-inset ring-gray-300"
                 title="Docker Context"
             >
                 <x-docker-icon color="{{ $isDockerContext ? '#2396ED' : '#ccc' }}" />
+            </button>
+
+            <button
+                type="button"
+                wire:click="toggleContext('{{ ShellMeta::IS_REMOTE_CONTEXT->value }}')"
+                class="rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm ring-1 ring-inset ring-gray-300"
+                title="Remote Context"
+            >
+                <x-ssh-icon color="{{ $isRemoteContext ? '#000000' : '#ccc' }}" />
             </button>
         </div>
 
@@ -147,6 +159,91 @@
             </label>
         </template>
         {{-- Docker : END --}}
+
+        {{-- Remote : BEGIN --}}
+        <template x-if="$wire.isRemoteContext">
+            <label class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Remote Host:</span>
+                </div>
+                <div class="relative text-gray-600 flex-grow">
+                    <input
+                        wire:model.live="remoteHost"
+                        type="text"
+                        name="remoteHost"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    >
+                </div>
+            </label>
+        </template>
+        <template x-if="$wire.isRemoteContext">
+            <label class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Remote Port:</span>
+                </div>
+                <div class="relative text-gray-600 flex-grow">
+                    <input
+                        wire:model.live="remotePort"
+                        type="text"
+                        name="remotePort"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    >
+                </div>
+            </label>
+        </template>
+        <template x-if="$wire.isRemoteContext">
+            <label class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Remote User:</span>
+                </div>
+                <div class="relative text-gray-600 flex-grow">
+                    <input
+                        wire:model.live="remoteUser"
+                        type="text"
+                        name="remoteUser"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    >
+                </div>
+            </label>
+        </template>
+        <template x-if="$wire.isRemoteContext">
+            <label class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Remote Password:</span>
+                </div>
+                <div class="relative text-gray-600 flex-grow">
+                    <input
+                        wire:model.live="remotePassword"
+                        type="text"
+                        name="remotePassword"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    >
+                </div>
+            </label>
+        </template>
+        <template x-if="$wire.isRemoteContext">
+            <div class="flex items-center gap-2 text-sm h-10">
+                <div class="flex gap-2 items-center">
+                    <span class="w-32">Remote Password Type:</span>
+                </div>
+                <div class="relative text-gray-600 flex-grow flex gap-4">
+                    <span class="isolate inline-flex rounded-md shadow-sm">
+                        <button
+                            type="button"
+                            class="relative inline-flex items-center rounded-l-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-10 {{ $remotePasswordType === SshPasswordType::PASSWORD->value ? 'bg-blue-600 hover:bg-blue-800 text-white' : 'bg-white hover:bg-gray-50 text-gray-900' }}"
+                            @click="$wire.set('remotePasswordType', '{{ SshPasswordType::PASSWORD->value }}')"
+                        >Password</button>
+                        <button
+                            type="button"
+                            class="relative -ml-px inline-flex items-center rounded-r-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-10 {{ $remotePasswordType === SshPasswordType::PRIVATE_KEY->value ? 'bg-blue-600 hover:bg-blue-800 text-white' : 'bg-white hover:bg-gray-50 text-gray-900' }}"
+                            {{--@click="$wire.set('remotePasswordType', '{{ SshPasswordType::PRIVATE_KEY->value }}')"--}}
+                            @click="alert('Private Key not available yet.')"
+                        >Private Key</button>
+                    </span>
+                </div>
+            </div>
+        </template>
+        {{-- Remote : END --}}
     </div>
     {{-- Opened : END --}}
 </div>
