@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\ShellMeta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Plank\Metable\Metable;
 
 class Shell extends Model
 {
     use HasFactory;
     use Metable;
+    use SoftDeletes;
 
     protected $fillable = [
         'user_id',

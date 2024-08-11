@@ -5,6 +5,7 @@ use App\Enums\SshPasswordType;
 use App\Helpers\ShellHelper;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ShellController;
+use App\Livewire\Dashboard;
 use App\Models\Shell;
 use Illuminate\Http\Response;
 use phpseclib3\Crypt\RSA\PrivateKey;
@@ -58,8 +59,7 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
 ])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/shell/{shell?}', [ShellController::class, 'index'])
         ->name('shells.show');
 });
