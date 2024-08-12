@@ -7,7 +7,6 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-
     public function deleteShell(int $shellId): bool
     {
         return Shell::find($shellId)->delete();

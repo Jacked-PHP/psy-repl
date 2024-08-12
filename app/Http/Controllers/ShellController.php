@@ -16,7 +16,7 @@ class ShellController extends Controller
 {
     public function index(Request $request, Shell $shell)
     {
-        if (null === $shell->id) {
+        if ($shell->id === null) {
             $shell = Shell::create([
                 'user_id' => auth()->id(),
                 'title' => Uuid::uuid4()->toString(),
@@ -30,9 +30,9 @@ class ShellController extends Controller
 
     public function executeRemoteCode(Request $request, Shell $shell)
     {
-        $host  = $shell->getMeta(ShellMeta::REMOTE_HOST->value);
-        $port  = $shell->getMeta(ShellMeta::REMOTE_PORT->value);
-        $user  = $shell->getMeta(ShellMeta::REMOTE_USER->value);
+        $host = $shell->getMeta(ShellMeta::REMOTE_HOST->value);
+        $port = $shell->getMeta(ShellMeta::REMOTE_PORT->value);
+        $user = $shell->getMeta(ShellMeta::REMOTE_USER->value);
         $password = $shell->getMeta(ShellMeta::REMOTE_PASSWORD->value);
         $password_type = $shell->getMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value);
         $code = ShellHelper::preparePHPCodeForTinker($shell->code);
@@ -47,7 +47,7 @@ class ShellController extends Controller
             throw new Exception('Login on remote server failed!');
         }
 
-        $command = 'cd ' . $shell->path . ' && ' . $code . ' | php artisan tinker';
+        $command = 'cd '.$shell->path.' && '.$code.' | php artisan tinker';
 
         return response()->stream(function () use ($command, $ssh, $shell) {
             $finalOutput = '';
@@ -58,10 +58,10 @@ class ShellController extends Controller
                         continue;
                     }
 
-                    echo 'id: ' . uniqid() . PHP_EOL;
-                    echo 'event: message' . PHP_EOL;
-                    echo 'data: ' . $piece . PHP_EOL . PHP_EOL;
-                    $finalOutput .= $piece . PHP_EOL;
+                    echo 'id: '.uniqid().PHP_EOL;
+                    echo 'event: message'.PHP_EOL;
+                    echo 'data: '.$piece.PHP_EOL.PHP_EOL;
+                    $finalOutput .= $piece.PHP_EOL;
                 }
             });
             $ssh->disconnect();

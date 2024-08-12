@@ -18,36 +18,49 @@ class TinkerEditor extends Component
 {
     // record data
     public ?int $shellId = null;
+
     public string $title = '';
+
     public string $php_binary = '';
+
     public ?string $path = null;
+
     public string $code = 'dd(App\Models\User::get());';
+
     public string $output = '';
 
     // docker settings
     public bool $isDockerContext = false;
+
     public ?string $dockerContainer = null;
+
     public ?string $dockerWorkdir = null;
 
     // generic settings
     public bool $settingsOpen = false;
+
     public bool $wordWrap = false;
 
     // remote settings
     public bool $isRemoteContext = false;
+
     public ?string $remoteHost = null;
+
     public ?string $remotePort = null;
+
     public ?string $remoteUser = null;
+
     public ?string $remotePassword = null;
+
     public ?string $remotePasswordType = null;
 
-    protected string $phpOpenTag = '<?php' . PHP_EOL;
+    protected string $phpOpenTag = '<?php'.PHP_EOL;
 
     public function mount(Shell $shell)
     {
         /** @var User $user */
         $user = auth()->user();
-        if (null === $user) {
+        if ($user === null) {
             throw new Exception('User not logged in');
         }
 
@@ -87,7 +100,7 @@ class TinkerEditor extends Component
 
             $error = $result->errorOutput();
             $output = $result->output();
-            if (!empty($error) && empty($output)) {
+            if (! empty($error) && empty($output)) {
                 return json_encode([
                     'error' => $error,
                     'output' => $result->output(),
@@ -101,31 +114,31 @@ class TinkerEditor extends Component
 
             return $shell->output;
         } catch (Exception $e) {
-            return 'Error: ' . $e->getMessage();
+            return 'Error: '.$e->getMessage();
         }
     }
 
     protected function executeCodeMetal(string $content): ProcessResult
     {
         if (
-            null === $this->php_binary
-            || empty(Process::run($this->php_binary . ' -v')->output())
+            $this->php_binary === null
+            || empty(Process::run($this->php_binary.' -v')->output())
         ) {
             throw new Exception('PHP Binary not found - review your settings.');
         }
 
         $projectPath = $this->path;
-        $tempPhpFile = Uuid::uuid4()->toString() . '.php';
-        $command = $this->php_binary . ' artisan tinker --execute="include(\'' . storage_path('app/' . $tempPhpFile) . '\')"';
+        $tempPhpFile = Uuid::uuid4()->toString().'.php';
+        $command = $this->php_binary.' artisan tinker --execute="include(\''.storage_path('app/'.$tempPhpFile).'\')"';
 
-        if (!$this->isLaravelFolder($projectPath)) {
+        if (! $this->isLaravelFolder($projectPath)) {
             throw new Exception('The path is not pointing to a valid Laravel project!');
         }
 
-        Storage::write($tempPhpFile, $this->phpOpenTag . $content);
+        Storage::write($tempPhpFile, $this->phpOpenTag.$content);
         $result = Process::path($projectPath)
             ->env($this->loadCustomEnv(
-                $projectPath . DIRECTORY_SEPARATOR . '.env'
+                $projectPath.DIRECTORY_SEPARATOR.'.env'
             ))
             ->run($command);
 
@@ -138,8 +151,8 @@ class TinkerEditor extends Component
     {
         $container = $this->dockerContainer;
         $workdir = $this->dockerWorkdir;
-        $tempPhpFile = Uuid::uuid4()->toString() . '.php';
-        $command = 'php artisan tinker --execute=\"include(\'' . $workdir . '/' . $tempPhpFile . '\')\"';
+        $tempPhpFile = Uuid::uuid4()->toString().'.php';
+        $command = 'php artisan tinker --execute=\"include(\''.$workdir.'/'.$tempPhpFile.'\')\"';
         $projectPath = $this->path;
         $result = Process::path($projectPath)->run('command -v docker compose');
 
@@ -149,13 +162,13 @@ class TinkerEditor extends Component
 
         // TODO: accept standalone docker as well instead of just docker compose
         // run procedures in container (using docker compose)
-        $dockerCommand = 'docker compose exec ' . $container . ' bash -c "cd ' . $workdir . ' && ' . $command . '"';
-        Storage::write($tempPhpFile, $this->phpOpenTag . $content);
-        Process::path($projectPath)->run('docker compose cp ' . storage_path('app/' . $tempPhpFile) . ' ' . $container . ':' . $workdir . '/' . $tempPhpFile);
+        $dockerCommand = 'docker compose exec '.$container.' bash -c "cd '.$workdir.' && '.$command.'"';
+        Storage::write($tempPhpFile, $this->phpOpenTag.$content);
+        Process::path($projectPath)->run('docker compose cp '.storage_path('app/'.$tempPhpFile).' '.$container.':'.$workdir.'/'.$tempPhpFile);
         $result = Process::path($projectPath)->run($dockerCommand);
 
         // clean temp file
-        Process::path($projectPath)->run('docker compose exec php bash -c "rm '. $workdir . '/' . $tempPhpFile . '"');
+        Process::path($projectPath)->run('docker compose exec php bash -c "rm '.$workdir.'/'.$tempPhpFile.'"');
         Storage::delete($tempPhpFile);
 
         return $result;
@@ -168,7 +181,7 @@ class TinkerEditor extends Component
         // Read the file into an array of lines
         $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-        if (false === $lines) {
+        if ($lines === false) {
             throw new Exception('Error reading the project\'s env file');
         }
 
@@ -178,7 +191,7 @@ class TinkerEditor extends Component
                 continue;
             }
 
-            list($name, $value) = explode('=', $line, 2);
+            [$name, $value] = explode('=', $line, 2);
             $name = trim($name);
             $value = trim($value);
 
@@ -195,10 +208,10 @@ class TinkerEditor extends Component
 
     protected function isLaravelFolder(string $folder): bool
     {
-        return file_exists($folder . DIRECTORY_SEPARATOR . 'artisan') &&
-            is_dir($folder . DIRECTORY_SEPARATOR . 'app') &&
-            is_dir($folder . DIRECTORY_SEPARATOR . 'bootstrap') &&
-            is_dir($folder . DIRECTORY_SEPARATOR . 'config');
+        return file_exists($folder.DIRECTORY_SEPARATOR.'artisan') &&
+            is_dir($folder.DIRECTORY_SEPARATOR.'app') &&
+            is_dir($folder.DIRECTORY_SEPARATOR.'bootstrap') &&
+            is_dir($folder.DIRECTORY_SEPARATOR.'config');
     }
 
     public function openFolderDialog()
@@ -207,7 +220,7 @@ class TinkerEditor extends Component
             ->folders()
             ->open();
 
-        if (null === $newPath) {
+        if ($newPath === null) {
             return;
         }
 
@@ -271,6 +284,7 @@ class TinkerEditor extends Component
                 'remotePassword' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD->value, $value),
                 'remotePasswordType' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value, $value),
             };
+
             return;
         }
 
@@ -292,14 +306,14 @@ class TinkerEditor extends Component
         $shell = Shell::find($this->shellId);
 
         if ($meta === ShellMeta::IS_REMOTE_CONTEXT->value) {
-            $this->isRemoteContext = !$this->isRemoteContext;
+            $this->isRemoteContext = ! $this->isRemoteContext;
             $this->isDockerContext = false;
             $shell->setManyMeta([
                 ShellMeta::IS_REMOTE_CONTEXT->value => $this->isRemoteContext,
                 ShellMeta::IS_DOCKER_CONTEXT->value => false,
             ]);
         } elseif ($meta === ShellMeta::IS_DOCKER_CONTEXT->value) {
-            $this->isDockerContext = !$this->isDockerContext;
+            $this->isDockerContext = ! $this->isDockerContext;
             $this->isRemoteContext = false;
             $shell->setManyMeta([
                 ShellMeta::IS_DOCKER_CONTEXT->value => $this->isDockerContext,

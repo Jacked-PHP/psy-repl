@@ -14,7 +14,7 @@ class ShellHelper
         $code = self::processCode($code);
 
         $code = array_filter($code);
-        $code = ' echo \'' . implode(' ', $code) . '\' ';
+        $code = ' echo \''.implode(' ', $code).'\' ';
 
         return $code;
     }
@@ -23,6 +23,7 @@ class ShellHelper
     {
         // prepare code
         $PROTOCOL_PLACEHOLDER = 'PROTOCOL_PLACE_HOLDER';
+
         return array_map(function ($item) use ($PROTOCOL_PLACEHOLDER) {
             // avoid protocol problems
             $item = str_replace('://', $PROTOCOL_PLACEHOLDER, $item);
@@ -40,7 +41,7 @@ class ShellHelper
             $item[0] = str_replace("'", "'\"'", $item[0]);
 
             // $item[0] = str_replace("\\", "'\\\\", $item[0]);
-            $item[0] = str_replace("\\", "\\\\", $item[0]);
+            $item[0] = str_replace('\\', '\\\\', $item[0]);
 
             return $item[0];
         }, $code);

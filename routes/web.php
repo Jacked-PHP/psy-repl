@@ -1,18 +1,10 @@
 <?php
 
-use App\Enums\ShellMeta;
-use App\Enums\SshPasswordType;
-use App\Helpers\ShellHelper;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ShellController;
 use App\Livewire\Dashboard;
-use App\Models\Shell;
-use Illuminate\Http\Response;
-use phpseclib3\Crypt\RSA\PrivateKey;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use phpseclib3\Net\SSH2;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,31 +19,34 @@ use phpseclib3\Net\SSH2;
 
 Route::get('/', function () {
     $user = User::first();
-    if (null === $user) {
+    if ($user === null) {
         return view('home');
     }
     Auth::login($user);
+
     return redirect()->route('dashboard');
 })->name('home');
 
-Route::get('login', function() {
+Route::get('login', function () {
     $user = User::first();
-    if (null === $user) {
+    if ($user === null) {
         $user = User::factory()->create();
     }
     Auth::login($user);
+
     return redirect()->route('dashboard');
 })->name('login');
 
-Route::post('logout', function() {
+Route::post('logout', function () {
     $user = User::firstOrFail();
     $user->purgeMeta();
     $user->shells()->delete();
     $user->delete();
+
     return redirect()->route('home');
 })->name('logout');
 
-Route::get('registration', function() {
+Route::get('registration', function () {
     return redirect()->route('home');
 })->name('register');
 
