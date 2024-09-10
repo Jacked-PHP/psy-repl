@@ -35,6 +35,7 @@ jobs:
     - name: Build Native PHP project
       run: |
         cp .env.example .env
+        sed -i "s/NATIVEPHP_APP_VERSION=.*/NATIVEPHP_APP_VERSION=${GITHUB_REF#refs\/tags\/v}/" .env
         php artisan key:generate
         touch database/database.sqlite
         php artisan migrate:fresh
@@ -62,7 +63,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./builds/linux-x64/psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+        asset_path: ./dist/psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
         asset_name: psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
         asset_content_type: application/vnd.debian.binary-package
 
@@ -72,6 +73,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./builds/linux-x64/Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
+        asset_path: ./dist/Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
         asset_name: Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
         asset_content_type: application/x-executable
