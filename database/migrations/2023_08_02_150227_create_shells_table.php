@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('docker_container')->nullable();
             $table->string('docker_workdir')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
