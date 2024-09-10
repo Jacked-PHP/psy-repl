@@ -7,9 +7,6 @@ on:
 
 jobs:
   build:
-    permissions:
-      contents: write
-
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +49,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -62,7 +59,7 @@ jobs:
     - name: Upload .deb Release Asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./builds/linux-x64/psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
@@ -72,7 +69,7 @@ jobs:
     - name: Upload AppImage Release Asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./builds/linux-x64/Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
