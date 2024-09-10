@@ -1,52 +1,71 @@
-name: Build Electron App
+name: Build and Release Native PHP Project
 
 on:
   push:
-    branches:
-      - jetstream  # Trigger the action when changes are pushed to the 'main' branch
+    tags:
+      - 'v*'
 
 jobs:
   build:
-    runs-on: macos-latest  # Use the latest macOS runner
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-      - name: Setup PHP 8.2
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          tools: composer, phpunit
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        tools: composer:v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.16.0'
 
-      - name: Run PHP Dependencies
-        run: composer install --dev --no-interaction
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress
 
-      - name: Run Node Dependencies
-        run: npm install
+    - name: Install npm dependencies
+      run: npm install
 
-      - name: Run Node Dependencies
-        run: script -q /dev/null php artisan native:install --no-interaction
+    - name: Build frontend assets
+      run: npm run build
 
-      - name: Adjust PHP Dependencies
-        run: cp -r vendor/nativephp/php-bin/bin/mac/arm64 vendor/nativephp/php-bin/bin/mac/x64
+    - name: Build Native PHP project
+      run: php artisan native:build linux x64
 
-      - name: Prepare env
-        run: |
-          sed 's|NATIVEPHP_APP_VERSION_PLACEHOLDER|'"$GITHUB_RUN_NUMBER"'|g' ./.env.template > ./.env.step1
-          sed 's|DB_DATABASE_PLACEHOLDER|'"${{ github.workspace }}"'|g' ./.env.step1 > ./.env
-          rm -f ./.env.step1
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
 
-      - name: Build Electron App for macOS
-        run: script -q /dev/null php artisan native:build mac --no-interaction
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: app
-          path: dist/*.dmg
+    - name: Upload .deb Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./builds/linux-x64/psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+        asset_name: psy-repl_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: Upload AppImage Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./builds/linux-x64/Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
+        asset_name: Psy REPL-${{ steps.get_version.outputs.VERSION }}.AppImage
+        asset_content_type: application/x-executable
