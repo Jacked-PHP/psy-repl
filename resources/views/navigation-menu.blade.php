@@ -111,6 +111,12 @@
 
                             <div class="border-t border-gray-200"></div>
 
+                            @if (config('psy-repl.features.custom-repl'))
+                                <x-dropdown-link href="{{ route('settings-custom-repl') }}">
+                                    {{ __('REPL Settings') }}
+                                </x-dropdown-link>
+                            @endif
+
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}" x-data>
                                 @csrf

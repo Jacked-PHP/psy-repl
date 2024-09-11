@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ShellController;
+use App\Livewire\ReplSettings;
 use App\Livewire\Dashboard;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,8 @@ Route::middleware([
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/shell/{shell?}', [ShellController::class, 'index'])
         ->name('shells.show');
+    Route::get('/settings/custom-repl', ReplSettings::class)
+        ->name('settings-custom-repl');
 });
 
 Route::get('execute-remote/{shell}', [ShellController::class, 'executeRemoteCode'])

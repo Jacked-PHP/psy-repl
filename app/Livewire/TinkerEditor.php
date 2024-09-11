@@ -98,47 +98,50 @@ class TinkerEditor extends Component
                 $result = $this->executeCodeMetal($content);
             }
 
-            $error = $result->errorOutput();
-            $output = $result->output();
-            if (! empty($error) && empty($output)) {
-                return json_encode([
-                    'error' => $error,
-                    'output' => $result->output(),
-                ]);
-            }
-
-            $shell = Shell::find($this->shellId);
-            $shell->code = $content;
-            $shell->output = $result->output();
-            $shell->save();
-
-            return $shell->output;
+            return $this->processOutput($content, $result->output(), $result->errorOutput());
         } catch (Exception $e) {
             return 'Error: '.$e->getMessage();
         }
+    }
+
+    protected function processOutput(string $content, string $output, string $error): string
+    {
+        if (! empty($error) && empty($output)) {
+            return json_encode([
+                'error' => $error,
+                'output' => $output,
+            ]);
+        }
+
+        $shell = Shell::find($this->shellId);
+        $shell->code = $content;
+        $shell->output = $output;
+        $shell->save();
+
+        return $shell->output;
     }
 
     protected function executeCodeMetal(string $content): ProcessResult
     {
         if (
             $this->php_binary === null
-            || empty(Process::run($this->php_binary.' -v')->output())
+            || empty(Process::run($this->php_binary . ' -v')->output())
         ) {
             throw new Exception('PHP Binary not found - review your settings.');
         }
 
         $projectPath = $this->path;
-        $tempPhpFile = Uuid::uuid4()->toString().'.php';
-        $command = $this->php_binary.' artisan tinker --execute="include(\''.storage_path('app/'.$tempPhpFile).'\')"';
+        $tempPhpFile = Uuid::uuid4()->toString() . '.php';
+        $command = $this->php_binary . ' artisan tinker --execute="include(\''.storage_path('app/' . $tempPhpFile) . '\')"';
 
         if (! $this->isLaravelFolder($projectPath)) {
             throw new Exception('The path is not pointing to a valid Laravel project!');
         }
 
-        Storage::write($tempPhpFile, $this->phpOpenTag.$content);
+        Storage::write($tempPhpFile, $this->phpOpenTag . $content);
         $result = Process::path($projectPath)
             ->env($this->loadCustomEnv(
-                $projectPath.DIRECTORY_SEPARATOR.'.env'
+                $projectPath . DIRECTORY_SEPARATOR . '.env'
             ))
             ->run($command);
 
