@@ -20,4 +20,5 @@ enum ShellMeta: string
     // Generic metadata
     case SETTINGS_OPEN = 'settings_open';
     case WORD_WRAP = 'word_wrap';
+    case SHOWING_HIDDEN = 'showing_hidden';
 }

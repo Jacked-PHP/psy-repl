@@ -6,7 +6,7 @@
         </h2>
     </x-slot>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-3xl hidden">
+        <div class="mx-auto max-w-3xl">
             <form>
                 <div class="space-y-12">
                     <div class="border-b border-gray-900/10 pb-12">

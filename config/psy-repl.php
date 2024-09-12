@@ -1,7 +1,8 @@
 <?php
 
 return [
+    'editor' => 'ace',
     'features' => [
-        'custom-repl' => false,
+        'custom-repl' => true,
     ],
 ];

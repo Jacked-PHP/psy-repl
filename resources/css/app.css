@@ -6,6 +6,7 @@
     display: none;
 }
 
-* {
+*:not(.ace_editor, .ace-editor *) {
     font-family: 'Open Sans', sans-serif;
 }
+

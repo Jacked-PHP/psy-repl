@@ -16,6 +16,7 @@ use Ramsey\Uuid\Uuid;
 
 class TinkerEditor extends Component
 {
+    public string $editorType;
     // record data
     public ?int $shellId = null;
 
@@ -41,6 +42,8 @@ class TinkerEditor extends Component
 
     public bool $wordWrap = false;
 
+    public bool $isShowingHidden = false;
+
     // remote settings
     public bool $isRemoteContext = false;
 
@@ -58,6 +61,8 @@ class TinkerEditor extends Component
 
     public function mount(Shell $shell)
     {
+        $this->editorType = config('psy-repl.editor', 'codemirror');
+
         /** @var User $user */
         $user = auth()->user();
         if ($user === null) {
@@ -74,6 +79,7 @@ class TinkerEditor extends Component
         // general meta
         $this->settingsOpen = $shell->getMeta(ShellMeta::SETTINGS_OPEN->value, false);
         $this->wordWrap = $shell->getMeta(ShellMeta::WORD_WRAP->value, false);
+        $this->isShowingHidden = $shell->getMeta(ShellMeta::SHOWING_HIDDEN->value, false);
 
         // docker meta
         $this->isDockerContext = $shell->getMeta(ShellMeta::IS_DOCKER_CONTEXT->value, false);
@@ -247,14 +253,16 @@ class TinkerEditor extends Component
         if (in_array($name, [
             'settingsOpen',
             'wordWrap',
+            'isShowingHidden',
         ])) {
             $shell = Shell::find($this->shellId);
             match ($name) {
                 'settingsOpen' => $shell->setMeta(ShellMeta::SETTINGS_OPEN->value, $value),
                 'wordWrap' => $shell->setMeta(ShellMeta::WORD_WRAP->value, $value),
+                'isShowingHidden' => $shell->setMeta(ShellMeta::SHOWING_HIDDEN->value, $value),
             };
 
-            if ($name === 'wordWrap') {
+            if (in_array($name, ['wordWrap', 'isShowingHidden'])) {
                 redirect()->route('shells.show', ['shell' => $this->shellId]);
             }
 

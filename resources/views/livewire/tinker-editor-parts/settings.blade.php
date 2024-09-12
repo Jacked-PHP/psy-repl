@@ -63,6 +63,17 @@
             >
                 <x-ssh-icon color="{{ $isRemoteContext ? '#000000' : '#ccc' }}" />
             </button>
+
+            <button
+                type="button"
+                wire:click="$toggle('isShowingHidden')"
+                class="rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm ring-1 ring-inset ring-gray-300"
+                title="Show Hidden"
+            >
+                <x-show-hidden-icon open="{{ $isShowingHidden ? true : false }}" />
+            </button>
+
+
         </div>
 
         <label class="flex items-center gap-2 text-sm">

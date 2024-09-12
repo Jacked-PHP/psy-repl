@@ -6,7 +6,7 @@
     {{-- Code --}}
     <div
         :class="displayHorizontal ? 'w-1/2' : 'w-auto max-h-1/2'"
-        class="flex flex-col flex-grow"
+        class="flex flex-col flex-grow @if($editorType === 'codemirror') overflow-auto @endif"
     >
         <div class="bg-[#192d52] text-white text-xs text-center flex justify-between py-2 flex-1 h-[32px" :class="displayHorizontal ? 'border-r border-r-gray-500' : ''">
             <span class="w-14"></span>
@@ -38,12 +38,28 @@
                 </button>
             </div>
         </div>
-        <div
-            wire:ignore
-            class="code-content border-0 flex-grow bg-[#282828]"
-            :class="displayHorizontal ? 'max-w-1/2 h-auto max-h-full' : 'max-h-1/2 w-auto'"
-            x-ref="editor"
-        ></div>
+        @if ($editorType === 'monaco')
+            {{--<div
+                wire:ignore
+                class="code-content border-0 flex-grow bg-[#282828]"
+                :class="displayHorizontal ? 'max-w-1/2 h-auto max-h-full' : 'max-h-1/2 w-auto'"
+                x-ref="editor"
+            ></div>--}}
+        @elseif($editorType === 'ace')
+            <div
+                wire:ignore
+                class="ace-editor code-content border-0 flex-grow bg-[#282828] overflow-auto text-xl"
+                :class="displayHorizontal ? 'max-w-1/2 h-full max-h-full' : 'max-h-1/2 w-auto'"
+                x-ref="editor"
+            ></div>
+        @else
+            {{--<div
+                wire:ignore
+                class="code-content border-0 flex-grow bg-[#282828] overflow-auto"
+                :class="displayHorizontal ? 'max-w-1/2 h-full max-h-full' : 'max-h-1/2 w-auto'"
+                x-ref="editor"
+            ></div>--}}
+        @endif
     </div>
 
     {{-- Output --}}
@@ -64,10 +80,25 @@
             <span>Output</span>
             <span class="w-14"></span>
         </div>
-        <div
-            wire:ignore x-ref="output"
-            class="output-content bg-[#282828] flex-grow"
-            :class="displayHorizontal ? 'max-w-1/2 h-auto max-h-full' : 'max-h-1/2 w-auto'"
-        ></div>
+        @if ($editorType === 'monaco')
+            {{--<div
+                wire:ignore x-ref="output"
+                class="output-content bg-[#282828] flex-grow"
+                :class="displayHorizontal ? 'max-w-1/2 h-auto max-h-full' : 'max-h-1/2 w-auto'"
+            ></div>--}}
+        @elseif($editorType === 'ace')
+            <div
+                wire:ignore x-ref="output"
+                class="ace-editor output-content bg-[#282828] flex-grow overflow-auto text-xl"
+                :class="displayHorizontal ? 'max-w-1/2 h-full max-h-full' : 'max-h-1/2 w-auto'"
+            ></div>
+        @else
+            {{-- codemirror --}}
+            {{--<div
+                wire:ignore x-ref="output"
+                class="output-content bg-[#282828] flex-grow overflow-auto"
+                :class="displayHorizontal ? 'max-w-1/2 h-full max-h-full' : 'max-h-1/2 w-auto'"
+            ></div>--}}
+        @endif
     </div>
 </div>
