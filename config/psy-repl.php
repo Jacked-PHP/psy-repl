@@ -3,6 +3,6 @@
 return [
     'editor' => 'ace',
     'features' => [
-        'custom-repl' => true,
+        'custom-repl' => false,
     ],
 ];
