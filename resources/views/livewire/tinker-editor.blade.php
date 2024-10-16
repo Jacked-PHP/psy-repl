@@ -89,7 +89,7 @@
                 // --------------------------------------------
 
                 startAceEditor(domElement, content, readOnly) {
-                    ace.config.setModuleUrl("ace/mode/php_worker", "/worker-php.js");
+                    window.ace.config.setModuleUrl("ace/mode/php_worker", "/worker-php.js");
 
                     const editor = ace.edit(domElement);
 
