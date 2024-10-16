@@ -177,7 +177,7 @@ class TinkerEditor extends Component
         $result = Process::path($projectPath)->run($dockerCommand);
 
         // clean temp file
-        Process::path($projectPath)->run('docker compose exec php bash -c "rm '.$workdir.'/'.$tempPhpFile.'"');
+        Process::path($projectPath)->run('docker compose exec '.$container.' bash -c "rm '.$workdir.'/'.$tempPhpFile.'"');
         Storage::delete($tempPhpFile);
 
         return $result;
