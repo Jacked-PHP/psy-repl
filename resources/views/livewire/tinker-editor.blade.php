@@ -18,8 +18,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('codemirroreditor', () => ({
                 loading: false,
-                // codemirror instances
-                editorType: '{{ $editorType }}', // 'ace', 'codemirror' or 'monaco'
+
                 // shell state
                 code: '',
                 output: '',
@@ -32,12 +31,14 @@
                 // docker settings
                 isDockerContext: '{{ $isDockerContext }}',
                 dockerContainer: '{{ $dockerContainer }}',
+                dockerType: '{{ $dockerType }}',
 
                 // generic settings
                 dockerWorkdir: '{{ $dockerWorkdir }}',
                 settingsOpen: {{ $settingsOpen ? 'true' : 'false' }},
                 wordWrap: {{ $wordWrap ? 'true' : 'false' }},
                 isShowingHidden: {{ $isShowingHidden ? 'true' : 'false' }},
+                readOnlyRange: null,
 
                 // remote settings
                 isRemoteContext: {{ $isRemoteContext ? 'true' : 'false' }},
@@ -51,21 +52,13 @@
                     this.code = this.$wire.code;
                     this.output = this.$wire.output;
 
-                    if (this.editorType === 'codemirror') {
-                        // window.editor = this.startEditor(this.$refs.editor, this.code, false);
-                    } else if (this.editorType === 'ace') {
-                        window.editor = this.startAceEditor(this.$refs.editor, this.code, false);
-                    } else { // monaco
-                        // window.editor = this.startMonacoEditor(this.$refs.editor, this.code, false);
-                    }
+                    window.editor = this.startAceEditor(this.$refs.editor, this.code, false);
+                    window.outputEditor = this.startAceEditor(this.$refs.output, this.output, true);
 
-                    if (this.editorType === 'codemirror') {
-                        // window.outputEditor = this.startEditor(this.$refs.output, this.output, true);
-                    } else if (this.editorType === 'ace') {
-                        window.outputEditor = this.startAceEditor(this.$refs.output, this.output, true);
-                    } else { // monaco
-                        // window.outputEditor = this.startMonacoEditor(this.$refs.output, this.output, true);
-                    }
+                    setTimeout(() => {
+                        window.editor.focus();
+                        window.editor.getSession().selection.moveCursorTo(1, 0);
+                    }, 500);
 
                     this.macosFix();
                 },
@@ -84,133 +77,78 @@
                     });
                 },
 
-                // --------------------------------------------
-                // Ace : BEGIN
-                // --------------------------------------------
-
                 startAceEditor(domElement, content, readOnly) {
                     window.ace.config.setModuleUrl("ace/mode/php_worker", "/worker-php.js");
 
-                    const editor = ace.edit(domElement);
+                    const Range = ace.require('ace/range').Range;
+                    this.readOnlyRange = new Range(0, 0, 1, 0);
 
-                    editor.setTheme("ace/theme/monokai");
+                    const editor = ace.edit(domElement);
 
                     editor.setOptions({
                         useWorker: !readOnly,
                         showGutter: true,
-                        // not working for this mode (php inline)
-                        // enableFoldWidgets: true,
                         enableSnippets: true,
-                        // showFoldWidgets: true,
-                        // foldStyle: "markbeginend",
-                        showInvisibles: this.isShowingHidden,
+                        showFoldWidgets: true,
+                        foldStyle: "markbeginend",
                         readOnly: readOnly,
                     });
 
-                    editor.getSession().setFoldStyle("markbeginend");
+                    editor.setTheme("ace/theme/monokai");
+                    this.setCurrentEditorValue(editor, readOnly ? this.output : this.code, readOnly);
 
-                    editor.getSession().setValue(readOnly ? this.output : this.code);
-                    editor.getSession().setMode({ path: "ace/mode/php", inline: true });
+                    if (!readOnly) {
+                        editor.getSession().setMode({path: "ace/mode/php", inline: true});
+                    } else {
+                        editor.getSession().setMode({path: "ace/mode/php"});
+                    }
+
                     editor.getSession().setUseWrapMode(this.wordWrap);
                     editor.getSession().on('change', this.saveAceCode.bind(this));
 
-                    editor.commands.addCommand({
-                        name: 'executeCode',
-                        bindKey: {win: 'Ctrl-Shift-Enter',  mac: 'Command-Shift-Enter'},
-                        exec: this.executeCode.bind(this),
-                        readOnly: false,
-                    });
+                    editor.commands.removeCommand('addLineBefore'); // command from sublime keymap
+                    editor.commands.addCommands([
+                        {
+                            name: 'executeCode',
+                            bindKey: {win: 'Ctrl-Shift-Enter', mac: 'Command-Shift-Enter'},
+                            exec: this.executeCode.bind(this),
+                            readOnly: false,
+                        },
+                        {
+                            name: 'openSearchBox',
+                            bindKey: {win: 'Ctrl-F', mac: 'Command-F'},
+                            exec: function (editor) {
+                                editor.execCommand('find');
+                            },
+                            readOnly: false,
+                        },
+                    ]);
 
                     return editor;
                 },
 
-                saveAceCode(delta) {
-                    this.code = window.editor.getValue();
-                    this.$wire.saveCode(this.code);
+                getCurrentEditorValue() {
+                    return window.editor.getValue();
                 },
 
-                // --------------------------------------------
-                // Ace : END
-                // --------------------------------------------
+                setCurrentEditorValue(editor, code, output) {
+                    if (!output) {
+                        editor.getSession().setValue(code);
+                        return;
+                    }
 
-                // --------------------------------------------
-                // CodeMirror : BEGIN
-                // --------------------------------------------
+                    // this is a quickfix for the output to be able to be collapsed
+                    editor.getSession().setValue("<\?php\n\n" + code);
+                    editor.getSession().addFold("", this.readOnlyRange);
+                    setTimeout(() => {
+                        editor.getSession().bgTokenizer.start(0);
+                    }, 50);
+                },
 
-                // startEditor(domElement, content, readOnly) {
-                //     return new window.EditorView({
-                //         state: this.startEditorState(content, readOnly),
-                //         parent: domElement,
-                //     });
-                // },
-
-                // startEditorState(content, readOnly) {
-                //     let language = new window.editorCompartment, tabSize = new window.editorCompartment
-                //     return window.EditorState.create({
-                //         doc: content,
-                //         extensions: [
-                //             window.editorBasicSetup,
-                //             language.of(window.editorPhp()),
-                //             tabSize.of(EditorState.tabSize.of(4)),
-                //             window.editorKeymap.of([
-                //                 { key: "Shift-Ctrl-Enter", run: this.executeCode.bind(this) }
-                //             ]),
-                //             window.gruvboxDark,
-                //             window.EditorState.readOnly.of(readOnly),
-                //             window.EditorView.lineWrapping,
-                //             EditorView.updateListener.of(update => {
-                //                 if (update.changes && !readOnly) {
-                //                     this.code = update.state.doc.toString();
-                //                     this.$wire.saveCode(this.code);
-                //                 }
-                //             }),
-                //         ],
-                //     });
-                // },
-
-                // --------------------------------------------
-                // CodeMirror : END
-                // --------------------------------------------
-
-                // --------------------------------------------
-                // Monaco : BEGIN
-                // --------------------------------------------
-
-                // startMonacoEditor(domElement, content, readonly) {
-                //     let monacoEditor = window.monaco.editor.create(domElement, {
-                //         value: content,
-                //         language: 'php',
-                //         automaticLayout: true,
-                //         minimap: {
-                //             enabled: true,
-                //         },
-                //         theme: 'vs-dark',
-                //         padding: {
-                //             top: 1,
-                //         },
-                //         lineHeight: 23,
-                //         fontSize: 18,
-                //         wordWrap: this.wordWrap,
-                //         autoClosingBrackets: 'always',
-                //         readOnly: readonly,
-                //         scrollBeyondLastLine: false,
-                //     });
-                //     if (!readonly) { // input editor
-                //         monacoEditor.getModel().onDidChangeContent(this.saveMonacoCode.bind(this, monacoEditor));
-                //
-                //         monacoEditor.addCommand(window.monaco.KeyMod.CtrlCmd | window.monaco.KeyMod.Shift | window.monaco.KeyCode.Enter, this.executeCode.bind(this));
-                //     }
-                //     return monacoEditor;
-                // },
-
-                // saveMonacoCode(monacoEditor) {
-                //     this.code = monacoEditor.getValue();
-                //     this.$wire.saveCode(this.code);
-                // },
-
-                // --------------------------------------------
-                // Monaco : END
-                // --------------------------------------------
+                saveAceCode(delta) {
+                    this.code = this.getCurrentEditorValue();
+                    this.$wire.saveCode(this.code);
+                },
 
                 toggleSettingsForm() {
                     console.log(this.settingsOpen)
@@ -233,109 +171,41 @@
                 },
 
                 async executeCodeLocal(view) {
-                    if (this.editorType === 'codemirror') {
-                        // console.log(window.editor.state.doc.toString());
-                        // let result = await this.execute(window.editor.state.doc.toString());
-                        // window.outputEditor.dispatch({
-                        //     changes: {
-                        //         from: 0,
-                        //         to: window.outputEditor.state.doc.length,
-                        //         insert: result,
-                        //     },
-                        // });
-                    } else if (this.editorType === 'ace') {
-                        let result = await this.execute(window.editor.getValue());
-                        window.outputEditor.getSession().setValue(result);
-                    } else if (this.editorType === 'monaco') { // monaco
-                        // let result = await this.execute(this.code);
-                        // window.outputEditor.setValue(result);
-                    } else {
-                        let message = 'Unknown editor type';
-                        console.error(message);
-                        alert(message);
-                    }
+                    let result = await this.execute(this.getCurrentEditorValue());
+                    this.setCurrentEditorValue(window.outputEditor, result, true);
                 },
 
                 executeCodeRemote() {
-                    if (this.editorType === 'codemirror') {
-                        // let result = this.execute((view ?? window.editor).state.doc.toString());
-                        // window.outputEditor.dispatch({
-                        //     changes: {
-                        //         from: 0,
-                        //         to: window.outputEditor.state.doc.length,
-                        //         insert: result,
-                        //     },
-                        // });
-                        // const message = 'Remote execution is not supported for CodeMirror';
-                        // console.error(message);
-                        // alert(message);
-                    } else if (this.editorType === 'ace') {
-                        let result = '';
-                        fetch('/execute-remote/{{ $shellId }}').then(response => {
-                            const reader = response.body.getReader();
-                            const decoder = new TextDecoder("utf-8");
-                            function processStream({ done, value }) {
-                                if (done) {
-                                    console.log("Stream complete");
-                                    return;
-                                }
-                                const chunk = decoder.decode(value, { stream: true });
-                                const events = chunk.split("\n\n");
-                                events.forEach(event => {
-                                    if (event.trim().length > 0) {
-                                        const lines = event.trim().split("\n");
-                                        lines.forEach(line => {
-                                            if (line.startsWith("data:")) {
-                                                result += line.replace("data: ", "") + "\n";
-                                                window.outputEditor.setValue(result);
-                                            }
-                                        });
-                                    }
-                                });
-                                return reader.read().then(processStream);
+                    let result = '';
+                    fetch('/execute-remote/{{ $shellId }}').then(response => {
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder("utf-8");
+                        function processStream({ done, value }) {
+                            if (done) {
+                                console.log("Stream complete");
+                                return;
                             }
-
-                            // Start reading the stream
+                            const chunk = decoder.decode(value, { stream: true });
+                            const events = chunk.split("\n\n");
+                            events.forEach(event => {
+                                if (event.trim().length > 0) {
+                                    const lines = event.trim().split("\n");
+                                    lines.forEach(line => {
+                                        if (line.startsWith("data:")) {
+                                            result += line.replace("data: ", "") + "\n";
+                                            this.setCurrentEditorValue(window.outputEditor, result);
+                                        }
+                                    });
+                                }
+                            });
                             return reader.read().then(processStream);
-                        }).catch(error => {
-                            console.error("Fetch error:", error);
-                        });
-                    } else if (this.editorType === 'monaco') {
-                        {{--let result = '';--}}
-                        {{--fetch('/execute-remote/{{ $shellId }}').then(response => {--}}
-                        {{--    const reader = response.body.getReader();--}}
-                        {{--    const decoder = new TextDecoder("utf-8");--}}
-                        {{--    function processStream({ done, value }) {--}}
-                        {{--        if (done) {--}}
-                        {{--            console.log("Stream complete");--}}
-                        {{--            return;--}}
-                        {{--        }--}}
-                        {{--        const chunk = decoder.decode(value, { stream: true });--}}
-                        {{--        const events = chunk.split("\n\n");--}}
-                        {{--        events.forEach(event => {--}}
-                        {{--            if (event.trim().length > 0) {--}}
-                        {{--                const lines = event.trim().split("\n");--}}
-                        {{--                lines.forEach(line => {--}}
-                        {{--                    if (line.startsWith("data:")) {--}}
-                        {{--                        result += line.replace("data: ", "") + "\n";--}}
-                        {{--                        window.outputEditor.setValue(result);--}}
-                        {{--                    }--}}
-                        {{--                });--}}
-                        {{--            }--}}
-                        {{--        });--}}
-                        {{--        return reader.read().then(processStream);--}}
-                        {{--    }--}}
+                        }
 
-                        {{--    // Start reading the stream--}}
-                        {{--    return reader.read().then(processStream);--}}
-                        {{--}).catch(error => {--}}
-                        {{--    console.error("Fetch error:", error);--}}
-                        {{--});--}}
-                    } else {
-                        const message = 'Unknown editor type';
-                        console.error(message);
-                        alert(message);
-                    }
+                        // Start reading the stream
+                        return reader.read().then(processStream);
+                    }).catch(error => {
+                        console.error("Fetch error:", error);
+                    });
                 },
 
                 /**

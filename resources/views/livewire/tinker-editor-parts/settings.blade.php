@@ -1,5 +1,6 @@
 @use('App\Enums\ShellMeta')
 @use('App\Enums\SshPasswordType')
+@use('App\Enums\DockerType')
 
 <div x-ref="control" class="py-1 px-2 bg-white h-auto border-t border-t-gray-200 border-l border-l-gray-200 border-r border-r-gray-200 rounded rounded-tl-2xl rounded-tr-2xl mx-4 drop-shadow-md" :class="$store.editor.minimalMode ? 'hidden' : ''" x-cloak>
     {{-- Closed : BEGIN --}}
@@ -76,6 +77,11 @@
 
         </div>
 
+        <div class="w-full flex justify-center flex-col">
+            <div class="w-full border-t border-gray-300 h-1 mt-6"></div>
+            <div class="mx-auto text-black -mt-4 bg-white px-2">Shell</div>
+        </div>
+
         <label class="flex items-center gap-2 text-sm">
             <span class="w-32">Title:</span>
             <div class="relative text-gray-600 flex-grow">
@@ -138,9 +144,38 @@
 
         {{-- Docker : BEGIN --}}
         <template x-if="$wire.isDockerContext">
+            <div class="w-full flex justify-center flex-col">
+                <div class="w-full border-t border-gray-300 h-1 mt-6"></div>
+                <div class="mx-auto text-black -mt-4 bg-white px-2">Docker Section</div>
+            </div>
+        </template>
+        <template x-if="$wire.isDockerContext">
+            <fieldset aria-label="Choose a memory option">
+                {{--<div class="flex items-center text-sm h-10 pl-32 ml-2">--}}
+                <div class="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-6 pl-32 ml-2">
+                    <label
+                        class="flex cursor-pointer items-center justify-center rounded-2xl px-2 py-2 text-sm font-semibold focus:outline-none sm:flex-1"
+                        :class="dockerType === '{{ DockerType::DOCKER_COMPOSE->value }}' ? 'ring-0 bg-blue-600 text-white hover:bg-blue-500' : 'ring-1 ring-gray-300 bg-white text-gray-900 hover:bg-gray-50'"
+                        @click="dockerType = '{{ DockerType::DOCKER_COMPOSE->value }}'"
+                    >
+                        <input wire:model.live="dockerType" type="radio" name="memory-option" value="{{ DockerType::DOCKER_COMPOSE->value }}" class="sr-only">
+                        <span>Docker Compose</span>
+                    </label>
+                    <label
+                        class="flex cursor-pointer items-center justify-center rounded-2xl px-2 py-2 text-sm font-semibold focus:outline-none sm:flex-1"
+                        :class="dockerType === '{{ DockerType::DOCKER->value }}' ? 'ring-0 bg-blue-600 text-white hover:bg-blue-500' : 'ring-1 ring-gray-300 bg-white text-gray-900 hover:bg-gray-50'"
+                        @click="dockerType = '{{ DockerType::DOCKER->value }}'"
+                    >
+                        <input wire:model.live="dockerType" type="radio" name="memory-option" value="{{ DockerType::DOCKER->value }}" class="sr-only">
+                        <span>Docker</span>
+                    </label>
+                </div>
+            </fieldset>
+        </template>
+        <template x-if="$wire.isDockerContext">
             <label class="flex items-center gap-2 text-sm h-10">
                 <div class="flex gap-2 items-center">
-                    <span class="w-32">Container name:</span>
+                    <span class="w-32"><span x-text="dockerType === '{{ DockerType::DOCKER_COMPOSE->value }}' ? 'Service' : 'Container'"></span> name:</span>
                 </div>
                 <div class="relative text-gray-600 flex-grow">
                     <input

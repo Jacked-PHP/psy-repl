@@ -22,8 +22,13 @@ import focus from '@alpinejs/focus';
 import ace from "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/mode-php";
-// import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/worker-php.js";
+import "ace-builds/src-noconflict/ext-searchbox";
+import "ace-builds/src-noconflict/snippets/php";
+import "ace-builds/src-noconflict/snippets/php_laravel_blade";
+import "ace-builds/src-noconflict/keybinding-sublime";
+import "ace-builds/src-noconflict/ext-inline_autocomplete";
 
 // -----------------------------------------------
 // monaco

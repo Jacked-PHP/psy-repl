@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\DockerType;
 use App\Enums\ShellMeta;
 use App\Enums\SshPasswordType;
 use App\Models\Shell;
@@ -16,7 +17,6 @@ use Ramsey\Uuid\Uuid;
 
 class TinkerEditor extends Component
 {
-    public string $editorType;
     // record data
     public ?int $shellId = null;
 
@@ -36,6 +36,8 @@ class TinkerEditor extends Component
     public ?string $dockerContainer = null;
 
     public ?string $dockerWorkdir = null;
+
+    public ?string $dockerType = null;
 
     // generic settings
     public bool $settingsOpen = false;
@@ -61,8 +63,6 @@ class TinkerEditor extends Component
 
     public function mount(Shell $shell)
     {
-        $this->editorType = config('psy-repl.editor', 'codemirror');
-
         /** @var User $user */
         $user = auth()->user();
         if ($user === null) {
@@ -85,6 +85,7 @@ class TinkerEditor extends Component
         $this->isDockerContext = $shell->getMeta(ShellMeta::IS_DOCKER_CONTEXT->value, false);
         $this->dockerWorkdir = $shell->getMeta(ShellMeta::DOCKER_WORKDIR->value, '');
         $this->dockerContainer = $shell->getMeta(ShellMeta::DOCKER_CONTAINER->value, '');
+        $this->dockerType = $shell->getMeta(ShellMeta::DOCKER_TYPE->value, DockerType::DOCKER_COMPOSE->value);
 
         // remote meta
         $this->isRemoteContext = $shell->getMeta(ShellMeta::IS_REMOTE_CONTEXT->value, false);
@@ -169,15 +170,62 @@ class TinkerEditor extends Component
             throw new Exception('Docker not available in the system!');
         }
 
-        // TODO: accept standalone docker as well instead of just docker compose
-        // run procedures in container (using docker compose)
+        if ($this->dockerType === DockerType::DOCKER_COMPOSE->value) {
+            return $this->executeDockerCompose(
+                container: $container,
+                workdir: $workdir,
+                tempPhpFile: $tempPhpFile,
+                command: $command,
+                projectPath: $projectPath,
+                content: $content,
+            );
+        }
+
+        return $this->executeDocker(
+            container: $container,
+            workdir: $workdir,
+            tempPhpFile: $tempPhpFile,
+            command: $command,
+            projectPath: $projectPath,
+            content: $content,
+        );
+    }
+
+    protected function executeDockerCompose(
+        string $container,
+        string $workdir,
+        string $tempPhpFile,
+        string $command,
+        string $projectPath,
+        string $content,
+    ): ProcessResult {
         $dockerCommand = 'docker compose exec '.$container.' bash -c "cd '.$workdir.' && '.$command.'"';
-        Storage::write($tempPhpFile, $this->phpOpenTag.$content);
+        Storage::write($tempPhpFile, $this->phpOpenTag . $content);
         Process::path($projectPath)->run('docker compose cp '.storage_path('app/'.$tempPhpFile).' '.$container.':'.$workdir.'/'.$tempPhpFile);
         $result = Process::path($projectPath)->run($dockerCommand);
 
         // clean temp file
         Process::path($projectPath)->run('docker compose exec '.$container.' bash -c "rm '.$workdir.'/'.$tempPhpFile.'"');
+        Storage::delete($tempPhpFile);
+
+        return $result;
+    }
+
+    protected function executeDocker(
+        string $container,
+        string $workdir,
+        string $tempPhpFile,
+        string $command,
+        string $projectPath,
+        string $content,
+    ): ProcessResult {
+        $dockerCommand = 'docker exec ' . $container . ' bash -c "cd ' . $workdir . ' && ' . $command . '"';
+        Storage::write($tempPhpFile, $this->phpOpenTag . $content);
+        Process::path($projectPath)->run('docker cp '.storage_path('app/' . $tempPhpFile) . ' ' . $container . ':' . $workdir . '/' . $tempPhpFile);
+        $result = Process::path($projectPath)->run($dockerCommand);
+
+        // clean temp file
+        Process::path($projectPath)->run('docker exec ' . $container . ' bash -c "rm ' . $workdir . '/' . $tempPhpFile . '"');
         Storage::delete($tempPhpFile);
 
         return $result;
@@ -275,6 +323,7 @@ class TinkerEditor extends Component
             'isDockerContext',
             'dockerContainer',
             'dockerWorkdir',
+            'dockerType',
             // remote settings
             'isRemoteContext',
             'remoteHost',
@@ -288,6 +337,7 @@ class TinkerEditor extends Component
                 // docker settings
                 'dockerContainer' => $shell->setMeta(ShellMeta::DOCKER_CONTAINER->value, $value),
                 'dockerWorkdir' => $shell->setMeta(ShellMeta::DOCKER_WORKDIR->value, $value),
+                'dockerType' => $shell->setMeta(ShellMeta::DOCKER_TYPE->value, $value),
                 // remote settings
                 'remoteHost' => $shell->setMeta(ShellMeta::REMOTE_HOST->value, $value),
                 'remotePort' => $shell->setMeta(ShellMeta::REMOTE_PORT->value, $value),

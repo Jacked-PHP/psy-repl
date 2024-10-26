@@ -8,6 +8,7 @@ enum ShellMeta: string
     case IS_DOCKER_CONTEXT = 'is_docker_context';
     case DOCKER_CONTAINER = 'docker_container';
     case DOCKER_WORKDIR = 'docker_workdir';
+    case DOCKER_TYPE = 'docker_type';
 
     // Remote metadata
     case IS_REMOTE_CONTEXT = 'is_remote_context';
