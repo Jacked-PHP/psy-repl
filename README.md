@@ -57,10 +57,14 @@ To get started with development:
 
 To build the application for distribution:
 
-1. Run the build command:
-   ```bash
-   php artisan native:build
-   ```
+1. Run the build command: (notice that this is an example for linux x64)
+    ```bash
+    rm -rf vendor node_modules
+    composer install
+    npm ci
+    npm run build
+    php artisan native:build linux x64
+    ```
 2. Find the installable assets in the `./dist` directory.
 
 ## How to set it up
