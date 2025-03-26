@@ -25,7 +25,7 @@ REPL screen:
 
 ## Installation
 
-At this moment it can be built for all platforms, but it is only tested with Linux. Just download form releases and install it.
+At this moment it can be built for all platforms, but it is only tested with Linux and Windows. Just download form releases and install it.
 
 ## Setup Instructions for Building and Running the Application
 
@@ -42,13 +42,22 @@ To get started with development:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/psy-repl.git
+   git clone https://github.com/Jacked-PHP/psy-repl.git
    ```
-2. Install dependencies:
+2. Create the `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Generate key:
+   ```bash
+   php artisan key:generate
+   ```
+4. Install dependencies:
    ```bash
    composer install
+   npm install
    ```
-3. Serve the application:
+5. Serve the application:
    ```bash
    php artisan native:serve
    ```
@@ -57,7 +66,8 @@ To get started with development:
 
 To build the application for distribution:
 
-1. Run the build command: (notice that this is an example for linux x64)
+#### Linux x64
+1. Run the build command
     ```bash
     rm -rf vendor node_modules
     composer install
@@ -66,6 +76,31 @@ To build the application for distribution:
     php artisan native:build linux x64
     ```
 2. Find the installable assets in the `./dist` directory.
+
+#### Windows
+
+1. Make sure you followed the development setup;
+   ```bash
+   cp .env.example .env
+   composer install
+   npm install
+   php artisan key:generate
+   ```
+2. Migrate the database;
+   ```bash
+   php artisan migrate
+   ```
+3. Run below command and follow the prompts to build the application (You may need to run this command in a terminal that has administrator privilages);
+   ```bash
+   php artisan native:build
+   ```
+4. Find the installable assets in the `./dist` directory.
+
+**Troubleshooting**
+
+If you get an error saying `The process "composer install --no-dev" exceeded the timeout of 60 seconds.`, run the `php artisan native:build` command again.
+
+If you still cannot build the application with administrator privilages, go to the `Task manager` and find if `Electron` is still running and, if it is running end it.
 
 ## How to set it up
 

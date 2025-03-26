@@ -22,4 +22,5 @@ enum ShellMeta: string
     case SETTINGS_OPEN = 'settings_open';
     case WORD_WRAP = 'word_wrap';
     case SHOWING_HIDDEN = 'showing_hidden';
+    case TEXT_SIZE = 'text_size';
 }

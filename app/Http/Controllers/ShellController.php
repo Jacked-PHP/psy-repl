@@ -17,9 +17,14 @@ class ShellController extends Controller
     public function index(Request $request, Shell $shell)
     {
         if ($shell->id === null) {
+            // Get the last shell created by the user and use its settings for the new shell
+            $last_shell = Shell::orderBy('created_at', 'desc')->first();
+
             $shell = Shell::create([
                 'user_id' => auth()->id(),
                 'title' => Uuid::uuid4()->toString(),
+                'php_binary' => $last_shell?->php_binary ?? 'php',
+                'path' => $last_shell?->path ?? '/var/www/html',
             ]);
         }
 

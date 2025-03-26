@@ -48,6 +48,9 @@
                 remotePassword: '{{ $remotePassword }}',
                 remotePasswordType: '{{ $remotePasswordType }}',
 
+                //editor settings
+                textSize: 'md',
+
                 init() {
                     this.code = this.$wire.code;
                     this.output = this.$wire.output;
@@ -61,6 +64,11 @@
                     }, 500);
 
                     this.macosFix();
+
+                    this.textSize = this.$wire.textSize;
+                    this.$watch('textSize', (newValue, oldValue) => {
+                        console.log(`textSize changed from ${oldValue} to ${newValue}`);
+                    });
                 },
 
                 macosFix() {

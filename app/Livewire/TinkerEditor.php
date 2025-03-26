@@ -21,6 +21,8 @@ class TinkerEditor extends Component
     public ?int $shellId = null;
 
     public string $title = '';
+    
+    public string $textSize = 'md';
 
     public string $php_binary = '';
 
@@ -94,6 +96,9 @@ class TinkerEditor extends Component
         $this->remoteUser = $shell->getMeta(ShellMeta::REMOTE_USER->value, '');
         $this->remotePassword = $shell->getMeta(ShellMeta::REMOTE_PASSWORD->value, '');
         $this->remotePasswordType = $shell->getMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value, SshPasswordType::PASSWORD->value);
+
+        // editor settings
+        $this->textSize = $shell->getMeta(ShellMeta::TEXT_SIZE->value, 'md');
     }
 
     public function executeCode(string $content)
@@ -331,6 +336,8 @@ class TinkerEditor extends Component
             'remoteUser',
             'remotePassword',
             'remotePasswordType',
+            // editor settings
+            'textSize',
         ])) {
             $shell = Shell::find($this->shellId);
             match ($name) {
@@ -344,7 +351,12 @@ class TinkerEditor extends Component
                 'remoteUser' => $shell->setMeta(ShellMeta::REMOTE_USER->value, $value),
                 'remotePassword' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD->value, $value),
                 'remotePasswordType' => $shell->setMeta(ShellMeta::REMOTE_PASSWORD_TYPE->value, $value),
+                'textSize' => $shell->setMeta(ShellMeta::TEXT_SIZE->value, $value),
             };
+
+            if (in_array($name, ['textSize'])) {
+                redirect()->route('shells.show', ['shell' => $this->shellId]);
+            }
 
             return;
         }
