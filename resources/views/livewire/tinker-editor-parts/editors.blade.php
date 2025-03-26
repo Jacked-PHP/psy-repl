@@ -43,7 +43,7 @@
                 'max-w-1/2 h-full max-h-full': displayHorizontal,
                 'text-xs': textSize == 'xs',
                 'text-sm': textSize == 'sm',
-                'text-md': textSize == 'md',
+                'text-base': textSize == 'md',
                 'text-lg': textSize == 'lg',
                 'text-xl': textSize == 'xl',
             }"
@@ -72,7 +72,7 @@
                 'max-w-1/2 h-full max-h-full': displayHorizontal,
                 'text-xs': textSize == 'xs',
                 'text-sm': textSize == 'sm',
-                'text-md': textSize == 'md',
+                'text-base': textSize == 'md',
                 'text-lg': textSize == 'lg',
                 'text-xl': textSize == 'xl',
             }">
