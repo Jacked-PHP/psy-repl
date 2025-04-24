@@ -81,19 +81,37 @@
             <div class="w-full border-t border-gray-300 h-1 mt-6"></div>
             <div class="mx-auto text-black -mt-4 bg-white px-2">Shell</div>
         </div>
-
-        <label class="flex items-center gap-2 text-sm">
-            <span class="w-32">Title:</span>
-            <div class="relative text-gray-600 flex-grow">
-                <input
-                    wire:model.live="title"
-                    type="text"
-                    name="title"
-                    class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
-                >
-            </div>
-        </label>
-
+        <div class="grid grid-cols-1 sm:grid-cols-2">
+            <label class="flex items-center gap-2 text-sm">
+                <span class="w-32">Title:</span>
+                <div class="relative text-gray-600 flex-grow">
+                    <input
+                        wire:model.live="title"
+                        type="text"
+                        name="title"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    >
+                </div>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+                <span class="w-32 pl-3">Text Size:</span>
+                <div class="relative text-gray-600 flex-grow">
+                    {{-- <input
+                        wire:model.live="title"
+                        type="text"
+                        name="title"
+                        class="bg-white h-8 w-full px-2 rounded-lg border text-sm focus:outline-none text-black"
+                    > --}}
+                    <select wire:model.live="textSize" class="bg-white h-8 w-full px-2 pt-1 rounded-lg border text-sm focus:outline-none text-black">
+                        <option value="xs">Extra Small</option>
+                        <option value="sm">Small</option>
+                        <option value="md">Medium</option>
+                        <option value="lg">Large</option>
+                        <option value="xl">Extra Large</option>
+                    </select>
+                </div>
+            </label>
+        </div>
         <label class="flex items-center gap-2 text-sm">
             <span class="w-32">PHP Binary:</span>
             <div class="relative text-gray-600 flex-grow">

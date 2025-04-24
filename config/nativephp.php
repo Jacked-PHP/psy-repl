@@ -76,4 +76,8 @@ return [
             ],
         ],
     ],
+    'prebuild' => [
+        'npm run build',
+        'php artisan optimize',
+    ],
 ];
