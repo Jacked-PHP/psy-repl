@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Artisan;
 use Native\Laravel\Facades\ContextMenu;
 use Native\Laravel\Facades\Dock;
 use Native\Laravel\Facades\GlobalShortcut;
+use Native\Laravel\Facades\Menu;
 use Native\Laravel\Facades\MenuBar;
 use Native\Laravel\Facades\Window;
-use Native\Laravel\Menu\Menu;
 
 class NativeAppServiceProvider
 {
@@ -20,15 +20,14 @@ class NativeAppServiceProvider
     {
         Artisan::call('migrate --force');
 
-        Menu::new()
-            // ->appMenu()
-            ->submenu('About', Menu::new()
-                ->link('https://github.com/Jacked-PHP/psy-repl', 'Jacked PHP - Psy REPL')
-            )
-            ->submenu('View', Menu::new()
-                ->toggleFullscreen()
-            )
-            ->register();
+        Menu::create(
+            Menu::label('About')->submenu(
+                Menu::link('https://github.com/Jacked-PHP/psy-repl', 'Jacked PHP - Psy REPL')
+            ),
+            Menu::label('View')->submenu(
+                Menu::fullscreen()
+            ),
+        );
 
         logger()->info('server', [
             'app' => config('app'),
@@ -40,7 +39,7 @@ class NativeAppServiceProvider
             ->showDockIcon()
             ->icon(storage_path('app/public/logo-bar.png'))
             ->onlyShowContextMenu()
-            ->withContextMenu(Menu::new()->quit());
+            ->withContextMenu(Menu::make(Menu::quit()));
 
         Window::open()
             // ->titleBarHidden()
@@ -58,7 +57,7 @@ class NativeAppServiceProvider
         //         )
         // );
 
-        ContextMenu::register(Menu::new());
+        ContextMenu::register(Menu::make());
 
         // GlobalShortcut::new()
         //     ->key('CmdOrCtrl+Shift+I')

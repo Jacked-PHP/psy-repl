@@ -11,11 +11,12 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered(): void
+    public function test_login_route_authenticates_the_desktop_user(): void
     {
         $response = $this->get('/login');
 
-        $response->assertStatus(200);
+        $this->assertAuthenticated();
+        $response->assertRedirect(RouteServiceProvider::HOME);
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

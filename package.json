@@ -27,5 +27,9 @@
         "cm6-theme-gruvbox-dark": "^0.2.0",
         "codemirror": "^6.0.1",
         "monaco-editor": "^0.41.0"
+    },
+    "allowScripts": {
+        "esbuild@0.18.20": true,
+        "fsevents@2.3.3": true
     }
 }

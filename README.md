@@ -33,6 +33,7 @@ At this moment it can be built for all platforms, but it is only tested with Lin
 
 While you don't need PHP installed on your machine to run the Psy REPL, you do need PHP available in your environment if you wish to develop or use it as a REPL:
 
+- **PHP version:** PHP 8.4 or newer is required for development and source builds.
 - **Docker Users:** Ensure PHP is available within your Docker environment.
 - **Bare Metal Users:** Ensure PHP is installed on your host machine.
 
@@ -109,4 +110,3 @@ This is a Native PHP project. In other words, it is a desktop app built with PHP
 ## Contribution
 
 We welcome contributions to Psy REPL! Whether you want to report bugs, suggest new features, or contribute code, we appreciate your involvement.
-
