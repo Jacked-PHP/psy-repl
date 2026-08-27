@@ -63,25 +63,9 @@
                         window.editor.getSession().selection.moveCursorTo(1, 0);
                     }, 500);
 
-                    this.macosFix();
-
                     this.textSize = this.$wire.textSize;
                     this.$watch('textSize', (newValue, oldValue) => {
                         console.log(`textSize changed from ${oldValue} to ${newValue}`);
-                    });
-                },
-
-                macosFix() {
-                    let that = this;
-                    this.$refs.php_binary.addEventListener('keydown', async function (event) {
-                        if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-                            that.php_binary = await navigator.clipboard.readText();
-                        }
-                    });
-                    this.$refs.path.addEventListener('keydown', async function (event) {
-                        if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-                            that.path = await navigator.clipboard.readText();
-                        }
                     });
                 },
 

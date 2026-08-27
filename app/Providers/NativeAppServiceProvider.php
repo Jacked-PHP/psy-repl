@@ -24,6 +24,7 @@ class NativeAppServiceProvider
             Menu::label('About')->submenu(
                 Menu::link('https://github.com/Jacked-PHP/psy-repl', 'Jacked PHP - Psy REPL')
             ),
+            Menu::edit(),
             Menu::label('View')->submenu(
                 Menu::fullscreen()
             ),
@@ -57,7 +58,11 @@ class NativeAppServiceProvider
         //         )
         // );
 
-        ContextMenu::register(Menu::make());
+        ContextMenu::register(Menu::make(
+            Menu::cut(),
+            Menu::copy(),
+            Menu::paste(),
+        ));
 
         // GlobalShortcut::new()
         //     ->key('CmdOrCtrl+Shift+I')
